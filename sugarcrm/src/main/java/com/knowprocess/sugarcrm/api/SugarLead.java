@@ -1,5 +1,7 @@
 package com.knowprocess.sugarcrm.api;
 
-public class SugarLead {
+import java.io.Serializable;
+
+public class SugarLead extends AbstractSugarRecord implements Serializable {
 
 }

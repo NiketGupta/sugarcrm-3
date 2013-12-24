@@ -1,6 +1,15 @@
 package com.knowprocess.sugarcrm.api;
 
-public class SugarSession {
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+public class SugarSession implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6958803585274323020L;
 
 	private String sessionId;
 	private String username;
@@ -50,4 +59,20 @@ public class SugarSession {
 		this.sugarUrl = sugarUrl;
 	}
 
+	/**
+	 * 
+	 * @return true if 'valid' session. Note this does not connect to a server
+	 *         so is a 'necessary but not sufficient' test.
+	 */
+	public boolean isValid() {
+		if (username == null || password == null || sugarUrl == null ) {
+			return false; 
+		}
+		try {
+			new URL(sugarUrl); 
+		} catch (MalformedURLException e) {
+			return false;
+		}
+		return true;
+	}
 }

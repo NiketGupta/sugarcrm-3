@@ -1,32 +1,43 @@
 package com.knowprocess.sugarcrm.api;
 
-public class SugarAccount {
+import java.io.Serializable;
 
-	private String id;
-	private String name;
+public class SugarAccount extends AbstractSugarRecord implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 190044867985297262L;
+
+	private String website;
+
+	private int employees;
 
 	public SugarAccount() {
 		;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public String getName() {
-		return name;
+		return (String) properties.get("name");
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		properties.put("name", name);
 	}
 
-	public String getNameValueListAsJson() {
-		return String.format("{ \"name\":\"name\", \"value\":\"%1$s\" }", name);
+	public String getWebsite() {
+		return website;
 	}
 
+	public void setWebsite(String website) {
+		properties.put("website", website);
+	}
+
+	public int getEmployees() {
+		return employees;
+	}
+
+	public void setEmployees(int employees) {
+		properties.put("employees", Integer.valueOf(employees));
+	}
 }

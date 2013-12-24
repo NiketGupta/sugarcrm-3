@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import com.knowprocess.sugarcrm.api.SugarSession;
 
-public class SugarServiveV4ImplTest {
+public class SugarServiceV4ImplTest {
 
 	private static final String PASSWORD = "sugar";
 
@@ -78,6 +78,27 @@ public class SugarServiveV4ImplTest {
 					+ "\"module_name\":\"Accounts\","
 					+ "\"name_value_list\":[{ \"name\":\"name\", "
 					+ "\"value\":\"ACME Inc.\" }]}", payload);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ":" + e.getMessage());
+		}
+	}
+
+	@Test
+	public void testSetRelationshipPayload() {
+		try {
+			String contactId = "contactId";
+			String acctId = "acctId";
+			String payload = svc.getSetRelationshipPayload(session, "Accounts",
+					acctId, "contacts", contactId);
+			System.out.println("payload: " + payload);
+			assertEquals(
+					"method=set_relationship&input_type=json&response_type=json"
+					+ "&rest_data={\"session\":\"null\","
+					+ "\"module_name\":\"Accounts\",\"module_id\": \"acctId\","
+					+ "\"link_field_name\": \"contacts\","
+					+ "\"related_ids\": [\"contactId\"]}",
+					payload);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getClass().getName() + ":" + e.getMessage());

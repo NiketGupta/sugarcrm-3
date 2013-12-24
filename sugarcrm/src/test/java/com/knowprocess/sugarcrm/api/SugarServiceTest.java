@@ -40,4 +40,41 @@ public class SugarServiceTest {
 		System.out.println("acct:" + acct.getNameValueListAsJson());
 		assertNotNull(acct.getId());
 	}
+
+	@Test
+	public void testCreateContact() {
+		svc.login(session);
+		System.out.println("session id: " + session.getSessionId());
+		assertNotNull(session.getSessionId());
+		assertTrue(session.getSessionId().matches("[a-z,0-9]{16,32}"));
+
+		SugarContact contact = new SugarContact();
+		contact.setFirstName("Tim");
+		contact.setLastName("Stephenson");
+		contact.setTitle("Mr");
+		svc.createContact(session, contact);
+		System.out.println("contact:" + contact.getNameValueListAsJson());
+		assertNotNull(contact.getId());
+	}
+
+	@Test
+	public void testCreateContactAndLinkedAccount() {
+		svc.login(session);
+		System.out.println("session id: " + session.getSessionId());
+		assertNotNull(session.getSessionId());
+		assertTrue(session.getSessionId().matches("[a-z,0-9]{16,32}"));
+
+		SugarContact contact = new SugarContact();
+		contact.setFirstName("John");
+		contact.setLastName("Braithwaite");
+		contact.setTitle("Mr");
+
+		SugarAccount acct = new SugarAccount();
+		acct.setName("Ergo Digital");
+
+		svc.createAccountWithPrimeContact(session, contact, acct);
+
+		System.out.println("contact:" + contact.getNameValueListAsJson());
+		assertNotNull(contact.getId());
+	}
 }

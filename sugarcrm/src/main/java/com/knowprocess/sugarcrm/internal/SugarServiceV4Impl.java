@@ -28,6 +28,10 @@ public class SugarServiceV4Impl {
 	}
 
 	public String login(SugarSession session) throws IOException {
+		if (!session.isValid()) {
+			throw new IllegalArgumentException(
+					"Session is not incompletely specified");
+		}
 		URL url = new URL(getServiceUrl(session.getSugarUrl()) + "?"
 				+ getLoginPayload(session));
 		return getIdFromGet(url);
@@ -58,8 +62,9 @@ public class SugarServiceV4Impl {
 		return id;
 	}
 
-	protected String getIdFromPost(URL url, String urlParameters)
+	protected String doPost(URL url, String urlParameters)
 			throws IOException {
+		System.out.println("POST to " + url + "\n  with " + urlParameters);
 		InputStream is = null;
 		StringBuffer response = new StringBuffer();
 		try {
@@ -90,7 +95,12 @@ public class SugarServiceV4Impl {
 		} finally {
 			is.close();
 		}
-		return parseId(response.toString());
+		return response.toString();
+	}
+
+	protected String getIdFromPost(URL url, String urlParameters)
+			throws IOException {
+		return parseId(doPost(url, urlParameters));
 	}
 
 	public String setEntry(SugarSession session, String module,
@@ -98,6 +108,16 @@ public class SugarServiceV4Impl {
 		URL url = new URL(getServiceUrl(session.getSugarUrl()));
 		return getIdFromPost(url,
 				getSetEntryPayload(session, module, nameValueList));
+	}
+
+	public String setRelationship(SugarSession session, String moduleName,
+			String moduleId, String linkField, String linkId)
+			throws IOException {
+		URL url = new URL(getServiceUrl(session.getSugarUrl()));
+		return doPost(
+				url,
+				getSetRelationshipPayload(session, moduleName, moduleId,
+						linkField, linkId));
 	}
 
 	public String getEntry(SugarSession session, String entryId) {
@@ -136,5 +156,12 @@ public class SugarServiceV4Impl {
 		String query = queries.getProperty("set_entry");
 		return String.format(query, session.getSessionId(), module,
 				nameValueList);
+	}
+
+	protected String getSetRelationshipPayload(SugarSession session,
+			String moduleName, String parentId, String linkField, String linkId) {
+		String query = queries.getProperty("set_relationship");
+		return String.format(query, session.getSessionId(), moduleName,
+				parentId, linkField, linkId);
 	}
 }

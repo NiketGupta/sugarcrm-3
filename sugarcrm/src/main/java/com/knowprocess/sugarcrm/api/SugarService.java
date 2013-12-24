@@ -1,6 +1,10 @@
 package com.knowprocess.sugarcrm.api;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.knowprocess.sugarcrm.internal.SugarServiceV4Impl;
 
@@ -30,7 +34,7 @@ public class SugarService {
 		return session;
 	}
 
-	public SugarAccount createAccount(SugarSession session, SugarAccount acct) {
+	public AbstractSugarRecord createAccount(SugarSession session, SugarAccount acct) {
 		try {
 			acct.setId(impl.setEntry(session, "Accounts",
 					acct.getNameValueListAsJson()));
@@ -43,7 +47,14 @@ public class SugarService {
 	}
 
 	public SugarContact createContact(SugarSession session, SugarContact contact) {
-		// TODO call set_entry
+		try {
+			contact.setId(impl.setEntry(session, "Contacts",
+					contact.getNameValueListAsJson()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new SugarException(e.getMessage(), e);
+		}
 		return contact;
 	}
 
@@ -52,7 +63,16 @@ public class SugarService {
 		createContact(session, contact);
 		createAccount(session, acct);
 
-		// TODO link contact and account.
+		try {
+			String response = impl.setRelationship(session, "Accounts",
+					acct.getId(), "contacts",
+					contact.getId());
+			System.out.println("Response: " + response);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new SugarException(e.getMessage(), e);
+		}
 		return contact;
 	}
 
@@ -64,5 +84,26 @@ public class SugarService {
 	public SugarContact getContact(SugarSession session, String contactId) {
 		// TODO get_entry
 		return null;
+	}
+
+	public static String getNameValueListAsJson(Map<String, Object> properties) {
+		StringBuffer sb = new StringBuffer();
+		for (Iterator<Entry<String, Object>> it = properties.entrySet()
+				.iterator(); it.hasNext();) {
+			Entry<String, Object> e = it.next();
+			sb.append("{\"").append("name").append("\":\"").append(e.getKey())
+					.append("\",");
+			sb.append("\"").append("value").append("\":\"");
+			if (e.getValue() instanceof Date) {
+				// sb.append(isoFormat.format(e.getValue()));
+			} else {
+				sb.append(e.getValue());
+			}
+			sb.append("\"}");
+			if (it.hasNext()) {
+				sb.append(",");
+			}
+		}
+		return sb.toString();
 	}
 }
