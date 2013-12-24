@@ -47,7 +47,13 @@ public class SugarServiceV4Impl {
 				response.append(new String(b));
 			}
 		} finally {
-			is.close();
+			try {
+				is.close();
+			} catch (NullPointerException e) {
+				// Good chance this is a Jenkins environment calling localhost
+				throw new IllegalStateException("Cannot connect to Sugar at: "
+						+ url, e);
+			}
 		}
 		return parseId(response.toString());
 	}
