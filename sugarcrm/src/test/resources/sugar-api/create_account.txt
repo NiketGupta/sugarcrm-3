@@ -1,0 +1,13 @@
+method=set_entry
+&input_type=json
+&response_type=json
+&rest_data={
+   "session":"li1o8lsb8o37gqres0bf7l88u3",
+   "module_name":"Accounts",
+   "name_value_list":[
+      {
+         "name":"name",
+         "value":"ACME Inc."
+      }
+   ]
+}

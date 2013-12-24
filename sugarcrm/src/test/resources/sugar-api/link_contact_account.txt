@@ -1,0 +1,10 @@
+method='set_relationship'
+&input_type=json
+&response_type=json
+&rest_data={
+   "session":"%1$s",
+   "module_name":"Accounts",
+   "module_id": "%2$s",
+   "link_field_name": "contacts",
+   "related_ids": [%3$s]
+}

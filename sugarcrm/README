@@ -1,0 +1,11 @@
+Sugar CRM Java Client 
+=====================
+
+Known Issues 
+------------
+
+0.1 - 24 Dec 13 - 
+-----------------
+- Basic session and service facade for REST API v4
+- Supports login, create contact, create account, create contact and account 
+  and link them in one call. 

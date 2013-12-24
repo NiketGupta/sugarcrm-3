@@ -1,0 +1,9 @@
+method=set_entry
+&input_type=json
+&response_type=json
+&rest_data={
+   "session":"blq8sg90fb11sv3fbfkjsk1am4",
+   "module_name":"Contacts",
+   "id":"9eb94da9-e61a-915b-30e1-52b341a17fe0",
+   "select_fields":[ ]
+}

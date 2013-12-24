@@ -1,0 +1,17 @@
+method=set_entry
+&input_type=json
+&response_type=json
+&rest_data={
+   "session":"blq8sg90fb11sv3fbfkjsk1am4",
+   "module_name":"Contacts",
+   "name_value_list":[
+      {
+         "name":"first_name",
+         "value":"John"
+      },
+      {
+         "name":"last_name",
+         "last_name":"Braithwaite"
+      }
+   ]
+}

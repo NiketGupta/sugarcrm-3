@@ -1,0 +1,12 @@
+method=login
+&input_type=json
+&response_type=json
+&rest_data={
+   "user_auth":{
+      "user_name":"admin",
+      "version":".01",
+      "username":"admin",
+      "password":"ada15bd1a5ddf0b790ae1dcfd05a1e70"
+   },
+   "application_name":"Custom API"
+}
