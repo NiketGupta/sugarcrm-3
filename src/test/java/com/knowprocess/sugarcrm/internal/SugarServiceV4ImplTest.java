@@ -39,11 +39,13 @@ public class SugarServiceV4ImplTest {
 
 	private static String pwd;
 
+	private static String url;
+
 	@BeforeClass
 	public static void setUpClass() {
 		String usr = System.getProperty("sugar.username");
 		pwd = System.getProperty("sugar.password");
-		String url = System.getProperty("sugar.url");
+		url = System.getProperty("sugar.url");
 		session = new SugarSession(usr == null ? "admin" : usr,
 				pwd == null ? "sugar" : pwd,
 				url == null ? SUGAR_BASE_URL : url);
@@ -67,7 +69,7 @@ public class SugarServiceV4ImplTest {
 
 	@Test
 	public void testGetServiceUrl() {
-		assertEquals(SUGAR_BASE_URL + "service/v4/rest.php",
+		assertEquals(url + "service/v4/rest.php",
 				svc.getServiceUrl(session.getSugarUrl()));
 	}
 
@@ -81,8 +83,9 @@ public class SugarServiceV4ImplTest {
 							+ "user_auth\":{\"user_name\":\"admin\","
 							+ "\"version\":\".01\","
 							+ "\"username\":\"admin\","
-							+ "\"password\":\"ada15bd1a5ddf0b790ae1dcfd05a1e70\"},"
-							+ "\"application_name\":\"com.knowprocess.sugarcrm.api.SugarService\"}",
+							+ "\"password\":\""
+							+ svc.hash(pwd)
+							+ "\"},\"application_name\":\"com.knowprocess.sugarcrm.api.SugarService\"}",
 					payload);
 		} catch (Exception e) {
 			e.printStackTrace();
