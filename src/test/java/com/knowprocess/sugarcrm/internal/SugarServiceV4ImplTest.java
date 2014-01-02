@@ -31,17 +31,22 @@ import com.knowprocess.sugarcrm.api.SugarSession;
 
 public class SugarServiceV4ImplTest {
 
-	private static final String PASSWORD = "sugar";
-
 	private static final String SUGAR_BASE_URL = "http://localhost/sugarcrm/";
 
 	private static SugarSession session;
 
 	private static SugarServiceV4Impl svc;
 
+	private static String pwd;
+
 	@BeforeClass
 	public static void setUpClass() {
-		session = new SugarSession("admin", PASSWORD, SUGAR_BASE_URL);
+		String usr = System.getProperty("sugar.username");
+		pwd = System.getProperty("sugar.password");
+		String url = System.getProperty("sugar.url");
+		session = new SugarSession(usr == null ? "admin" : usr,
+				pwd == null ? "sugar" : pwd,
+				url == null ? SUGAR_BASE_URL : url);
 		try {
 			svc = new SugarServiceV4Impl();
 		} catch (Exception e) {
@@ -53,7 +58,7 @@ public class SugarServiceV4ImplTest {
 	@Test
 	public void testHashedPassword() {
 		try {
-			assertEquals("ada15bd1a5ddf0b790ae1dcfd05a1e70", svc.hash(PASSWORD));
+			assertEquals("ada15bd1a5ddf0b790ae1dcfd05a1e70", svc.hash("sugar"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			fail(e.getClass().getName() + ":" + e.getMessage());

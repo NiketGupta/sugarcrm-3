@@ -38,8 +38,12 @@ public class SugarServiceTest {
 
 	@BeforeClass
 	public static void setUpClass() {
-		session = new SugarSession("admin", "sugar",
-				"http://localhost/sugarcrm");
+		String usr = System.getProperty("sugar.username");
+		String pwd = System.getProperty("sugar.password");
+		String url = System.getProperty("sugar.url");
+		session = new SugarSession(usr == null ? "admin" : usr,
+				pwd == null ? "sugar" : pwd,
+				url == null ? "http://localhost/sugarcrm" : url);
 		svc = new SugarService();
 	}
 
