@@ -28,7 +28,7 @@ import com.knowprocess.sugarcrm.api.SugarService;
  * @author timstephenson
  * 
  */
-public abstract class CrmRecord {
+public class CrmRecord {
 
 	protected String id;
 

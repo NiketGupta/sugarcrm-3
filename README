@@ -26,6 +26,10 @@ Getting Started
 Known Issues 
 ------------
 
+0.2 - - 
+-----------------
+- Added createLead and getContact.
+- Refactored to introduce CRM interface (potentially) abstracted of Sugar.
 
 0.1 - 24 Dec 13 - 
 -----------------

@@ -18,6 +18,7 @@
 package com.knowprocess.sugarcrm.internal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
@@ -25,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.knowprocess.crm.CrmRecord;
 import com.knowprocess.sugarcrm.api.SugarSession;
 
 public class SugarServiceV4ImplTest {
@@ -40,8 +42,6 @@ public class SugarServiceV4ImplTest {
 	@BeforeClass
 	public static void setUpClass() {
 		session = new SugarSession("admin", PASSWORD, SUGAR_BASE_URL);
-		// session = new SugarSession("TimS", "OHO02G",
-		// "http://sugar.syncapt.com/");
 		try {
 			svc = new SugarServiceV4Impl();
 		} catch (Exception e) {
@@ -119,6 +119,23 @@ public class SugarServiceV4ImplTest {
 							+ "\"module_id\": \"acctId\","
 							+ "\"link_field_name\": \"contacts\","
 							+ "\"related_ids\": [\"contactId\"]}", payload);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ":" + e.getMessage());
+		}
+	}
+
+	@Test
+	public void testParseRecordFromJson() {
+		try {
+			String json = "{\"name\":\"first_name\",\"value\":\"John\"},"
+					+ "{\"name\":\"title\",\"value\":\"Mr\"},"
+					+ "{\"name\":\"last_name\",\"value\":\"Braithwaite\"}";
+			CrmRecord record = svc.parseRecordFromJson(json);
+			assertNotNull(record);
+			assertEquals("John", record.getCustom("first_name"));
+			assertEquals("Braithwaite", record.getCustom("last_name"));
+			assertEquals("Mr", record.getCustom("title"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getClass().getName() + ":" + e.getMessage());

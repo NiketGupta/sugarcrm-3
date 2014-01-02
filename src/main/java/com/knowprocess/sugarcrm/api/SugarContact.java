@@ -20,7 +20,7 @@ package com.knowprocess.sugarcrm.api;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.knowprocess.crm.CrmRecord;
+import com.knowprocess.crm.CrmPerson;
 
 /**
  * Represents a Contact in Sugar.
@@ -28,7 +28,7 @@ import com.knowprocess.crm.CrmRecord;
  * @author timstephenson
  * 
  */
-public class SugarContact extends CrmRecord implements Serializable {
+public class SugarContact extends CrmPerson implements Serializable {
 
 	/**
 	 * 
@@ -105,54 +105,6 @@ public class SugarContact extends CrmRecord implements Serializable {
 
 	public void setDoNotCall(boolean doNotCall) {
 		properties.put("do_not_call", Boolean.valueOf(doNotCall));
-	}
-
-	public String getFirstName() {
-		return (String) properties.get("first_name");
-	}
-
-	public void setFirstName(String firstName) {
-		properties.put("first_name", firstName);
-	}
-
-	public String getLastName() {
-		return (String) properties.get("last_name");
-	}
-
-	public void setLastName(String lastName) {
-		properties.put("last_name", lastName);
-	}
-
-	public String getTitle() {
-		return (String) properties.get("title");
-	}
-
-	public void setTitle(String title) {
-		properties.put("title", title);
-	}
-
-	public String getPhoneWork() {
-		return (String) properties.get("phone_work");
-	}
-
-	public void setPhoneWork(String phoneWork) {
-		properties.put("phone_work", phoneWork);
-	}
-
-	public String getPhoneOther() {
-		return (String) properties.get("phone_other");
-	}
-
-	public void setPhoneOther(String phoneOther) {
-		properties.put("phone_other", phoneOther);
-	}
-
-	public String getEmail1() {
-		return (String) properties.get("email1");
-	}
-
-	public void setEmail1(String email1) {
-		properties.put("email1", email1);
 	}
 
 	public String getRealSource() {

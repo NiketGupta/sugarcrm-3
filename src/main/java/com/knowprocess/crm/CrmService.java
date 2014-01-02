@@ -17,6 +17,8 @@
  */
 package com.knowprocess.crm;
 
+import java.io.IOException;
+
 public interface CrmService {
 
 	CrmSession login(CrmSession session);
@@ -30,6 +32,7 @@ public interface CrmService {
 
 	CrmRecord createLead(CrmSession session, CrmRecord lead);
 
-	CrmRecord getContact(CrmSession session, String contactId);
+	CrmRecord getContact(CrmSession session, String contactId)
+			throws IOException;
 
 }

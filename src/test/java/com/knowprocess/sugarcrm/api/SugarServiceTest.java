@@ -17,13 +17,17 @@
  */
 package com.knowprocess.sugarcrm.api;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
 
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.knowprocess.crm.CrmPerson;
 import com.knowprocess.crm.CrmService;
 
 public class SugarServiceTest {
@@ -36,8 +40,6 @@ public class SugarServiceTest {
 	public static void setUpClass() {
 		session = new SugarSession("admin", "sugar",
 				"http://localhost/sugarcrm");
-		// session = new SugarSession("TimS", "OHO02G",
-		// "http://sugar.syncapt.com/");
 		svc = new SugarService();
 	}
 
@@ -57,9 +59,6 @@ public class SugarServiceTest {
 	public void testCreateAccount() {
 		try {
 			svc.login(session);
-			System.out.println("session id: " + session.getSessionId());
-			assertNotNull(session.getSessionId());
-			assertTrue(session.getSessionId().matches("[a-z,0-9]{16,32}"));
 
 			SugarAccount acct = new SugarAccount();
 			acct.setName("Tim Co.");
@@ -75,11 +74,8 @@ public class SugarServiceTest {
 	public void testCreateContact() {
 		try {
 			svc.login(session);
-			System.out.println("session id: " + session.getSessionId());
-			assertNotNull(session.getSessionId());
-			assertTrue(session.getSessionId().matches("[a-z,0-9]{16,32}"));
 
-			SugarContact contact = new SugarContact();
+			CrmPerson contact = new SugarContact();
 			contact.setFirstName("Tim");
 			contact.setLastName("Stephenson");
 			contact.setTitle("Mr");
@@ -95,11 +91,8 @@ public class SugarServiceTest {
 	public void testCreateContactAndLinkedAccount() {
 		try {
 			svc.login(session);
-			System.out.println("session id: " + session.getSessionId());
-			assertNotNull(session.getSessionId());
-			assertTrue(session.getSessionId().matches("[a-z,0-9]{16,32}"));
 
-			SugarContact contact = new SugarContact();
+			CrmPerson contact = new SugarContact();
 			contact.setFirstName("John");
 			contact.setLastName("Braithwaite");
 			contact.setTitle("Mr");
@@ -111,6 +104,37 @@ public class SugarServiceTest {
 
 			System.out.println("contact:" + contact.getNameValueListAsJson());
 			assertNotNull(contact.getId());
+
+			SugarContact contact2 = (SugarContact) svc.getContact(session,
+					contact.getId());
+			assertNotNull(contact2);
+			assertEquals(contact.getFirstName(), contact2.getFirstName());
+			assertEquals("John", contact2.getFirstName());
+			assertEquals(contact.getLastName(), contact2.getLastName());
+			assertEquals("Braithwaite", contact2.getFirstName());
+			assertEquals(contact.getTitle(), contact2.getTitle());
+			assertEquals("Mr", contact2.getFirstName());
+
+		} catch (IllegalStateException e) {
+			Assume.assumeTrue(e.getMessage(), true);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testCreateLead() {
+		try {
+			svc.login(session);
+
+			SugarLead lead = new SugarLead();
+			lead.setFirstName("Tim");
+			lead.setLastName("Stephenson");
+			lead.setTitle("Mr");
+			svc.createLead(session, lead);
+			System.out.println("lead:" + lead.getNameValueListAsJson());
+			assertNotNull(lead.getId());
 		} catch (IllegalStateException e) {
 			Assume.assumeTrue(e.getMessage(), true);
 		}

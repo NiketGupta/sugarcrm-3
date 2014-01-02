@@ -19,8 +19,13 @@ package com.knowprocess.sugarcrm.api;
 
 import java.io.Serializable;
 
-import com.knowprocess.crm.CrmRecord;
+import com.knowprocess.crm.CrmPerson;
 
-public class SugarLead extends CrmRecord implements Serializable {
+public class SugarLead extends CrmPerson implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7802082881477376628L;
 
 }

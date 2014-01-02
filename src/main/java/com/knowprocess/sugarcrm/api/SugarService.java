@@ -28,6 +28,11 @@ import com.knowprocess.crm.CrmService;
 import com.knowprocess.crm.CrmSession;
 import com.knowprocess.sugarcrm.internal.SugarServiceV4Impl;
 
+/**
+ * Exposes a more semantically rich API wrapping the setX, getX API of Sugar.
+ * 
+ * @author timstephenson
+ */
 public class SugarService implements CrmService {
 
 	// Only interested in one version for now.
@@ -43,12 +48,10 @@ public class SugarService implements CrmService {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see
-	 * com.knowprocess.sugarcrm.api.CrmService#login(com.knowprocess.sugarcrm
-	 * .api.SugarSession)
+	 * @see com.knowprocess.crm.api.CrmService#login(com.knowprocess.crm
+	 *      .api.CrmSession)
 	 */
 	public CrmSession login(CrmSession session) {
 		if (!(session instanceof SugarSession)) {
@@ -67,12 +70,10 @@ public class SugarService implements CrmService {
 		return session;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see
-	 * com.knowprocess.sugarcrm.api.CrmService#createAccount(com.knowprocess
-	 * .sugarcrm.api.SugarSession, com.knowprocess.sugarcrm.api.SugarAccount)
+	 * @see com.knowprocess.crm.api.CrmService#createAccount(com.knowprocess
+	 *      .crm.api.CrmSession, com.knowprocess.crm.api.CrmRecord)
 	 */
 	public CrmRecord createAccount(CrmSession session, CrmRecord acct) {
 		try {
@@ -86,16 +87,19 @@ public class SugarService implements CrmService {
 		return acct;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see
-	 * com.knowprocess.sugarcrm.api.CrmService#createContact(com.knowprocess
-	 * .sugarcrm.api.SugarSession, com.knowprocess.sugarcrm.api.SugarContact)
+	 * @see com.knowprocess.crm.api.CrmService#createContact(com.knowprocess
+	 *      .crm.api.CrmSession, com.knowprocess.crm.api.CrmRecord)
 	 */
 	public CrmRecord createContact(CrmSession session, CrmRecord contact) {
+		return setEntry(session, contact, "Contacts");
+	}
+
+	private CrmRecord setEntry(CrmSession session, CrmRecord contact,
+			String moduleName) {
 		try {
-			contact.setId(impl.setEntry(session, "Contacts",
+			contact.setId(impl.setEntry(session, moduleName,
 					contact.getNameValueListAsJson()));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -105,14 +109,12 @@ public class SugarService implements CrmService {
 		return contact;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see
-	 * com.knowprocess.sugarcrm.api.CrmService#createAccountWithPrimeContact
-	 * (com.knowprocess.sugarcrm.api.SugarSession,
-	 * com.knowprocess.sugarcrm.api.SugarContact,
-	 * com.knowprocess.sugarcrm.api.SugarAccount)
+	 * @see com.knowprocess.crm.api.CrmService#createAccountWithPrimeContact
+	 *      (com.knowprocess.crm.api.CrmSession,
+	 *      com.knowprocess.crm.api.CrmRecord,
+	 *      com.knowprocess.crm.api.CrmRecord)
 	 */
 	public CrmRecord createAccountWithPrimeContact(CrmSession session,
 			CrmRecord contact, CrmRecord acct) {
@@ -131,28 +133,24 @@ public class SugarService implements CrmService {
 		return contact;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see
-	 * com.knowprocess.sugarcrm.api.CrmService#createLead(com.knowprocess.sugarcrm
-	 * .api.SugarSession, com.knowprocess.sugarcrm.api.SugarLead)
+	 * @see com.knowprocess.crm.api.CrmService#createLead(com.knowprocess.crm
+	 *      .api.CrmSession, com.knowprocess.crm.api.CrmRecord)
 	 */
 	public CrmRecord createLead(CrmSession session, CrmRecord lead) {
-		// TODO set_entry
-		return lead;
+		return setEntry(session, lead, "Leads");
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see
-	 * com.knowprocess.sugarcrm.api.CrmService#getContact(com.knowprocess.sugarcrm
-	 * .api.SugarSession, java.lang.String)
+	 * @throws IOException
+	 * @see com.knowprocess.crm.api.CrmService#getContact(com.knowprocess.crm
+	 *      .api.CrmSession, java.lang.String)
 	 */
-	public CrmRecord getContact(CrmSession session, String contactId) {
-		// TODO get_entry
-		return null;
+	public CrmRecord getContact(CrmSession session, String contactId)
+			throws IOException {
+		return impl.getEntry(session, "Contacts", contactId);
 	}
 
 	public static String getNameValueListAsJson(Map<String, Object> properties) {
