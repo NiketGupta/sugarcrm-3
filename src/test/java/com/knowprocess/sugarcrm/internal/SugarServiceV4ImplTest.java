@@ -1,3 +1,20 @@
+/*
+ * A Java client library to interact with the Sugar CRM REST API.
+ * Copyright (C) 2013-2014 Tim Stephenson (tim@knowprocess.com)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.knowprocess.sugarcrm.internal;
 
 import static org.junit.Assert.assertEquals;
@@ -23,6 +40,8 @@ public class SugarServiceV4ImplTest {
 	@BeforeClass
 	public static void setUpClass() {
 		session = new SugarSession("admin", PASSWORD, SUGAR_BASE_URL);
+		// session = new SugarSession("TimS", "OHO02G",
+		// "http://sugar.syncapt.com/");
 		try {
 			svc = new SugarServiceV4Impl();
 		} catch (Exception e) {
@@ -74,8 +93,8 @@ public class SugarServiceV4ImplTest {
 					nameValueList);
 			System.out.println("payload: " + payload);
 			assertEquals("method=set_entry&input_type=json&response_type=json&"
-					+ "rest_data={\"session\":\"null\","
-					+ "\"module_name\":\"Accounts\","
+					+ "rest_data={\"session\":\"" + session.getSessionId()
+					+ "\",\"module_name\":\"Accounts\","
 					+ "\"name_value_list\":[{ \"name\":\"name\", "
 					+ "\"value\":\"ACME Inc.\" }]}", payload);
 		} catch (Exception e) {
@@ -94,11 +113,26 @@ public class SugarServiceV4ImplTest {
 			System.out.println("payload: " + payload);
 			assertEquals(
 					"method=set_relationship&input_type=json&response_type=json"
-					+ "&rest_data={\"session\":\"null\","
-					+ "\"module_name\":\"Accounts\",\"module_id\": \"acctId\","
-					+ "\"link_field_name\": \"contacts\","
-					+ "\"related_ids\": [\"contactId\"]}",
-					payload);
+							+ "&rest_data={\"session\":\""
+							+ session.getSessionId()
+							+ "\",\"module_name\":\"Accounts\","
+							+ "\"module_id\": \"acctId\","
+							+ "\"link_field_name\": \"contacts\","
+							+ "\"related_ids\": [\"contactId\"]}", payload);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ":" + e.getMessage());
+		}
+	}
+
+	@Test
+	public void testGetModuleFields() {
+		try {
+			session.setSessionId(svc.login(session));
+			System.out.println("session id: " + session.getSessionId());
+			String payload = svc.getModuleFields(session, "industry");
+			System.out.println("payload: " + payload);
+			// TODO assertions
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getClass().getName() + ":" + e.getMessage());

@@ -1,3 +1,20 @@
+/*
+ * A Java client library to interact with the Sugar CRM REST API.
+ * Copyright (C) 2013-2014 Tim Stephenson (tim@knowprocess.com)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.knowprocess.sugarcrm.internal;
 
 import java.io.DataOutputStream;
@@ -11,6 +28,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
+import com.knowprocess.crm.CrmSession;
 import com.knowprocess.sugarcrm.api.SugarAuthenticationException;
 import com.knowprocess.sugarcrm.api.SugarService;
 import com.knowprocess.sugarcrm.api.SugarSession;
@@ -109,24 +127,23 @@ public class SugarServiceV4Impl {
 		return parseId(doPost(url, urlParameters));
 	}
 
-	public String setEntry(SugarSession session, String module,
+	public String setEntry(CrmSession session, String module,
 			String nameValueList) throws IOException {
 		URL url = new URL(getServiceUrl(session.getSugarUrl()));
 		return getIdFromPost(url,
 				getSetEntryPayload(session, module, nameValueList));
 	}
 
-	public String setRelationship(SugarSession session, String moduleName,
+	public String setRelationship(CrmSession session, String moduleName,
 			String moduleId, String linkField, String linkId)
 			throws IOException {
-		URL url = new URL(getServiceUrl(session.getSugarUrl()));
 		return doPost(
-				url,
+				new URL(getServiceUrl(session.getSugarUrl())),
 				getSetRelationshipPayload(session, moduleName, moduleId,
 						linkField, linkId));
 	}
 
-	public String getEntry(SugarSession session, String entryId) {
+	public String getEntry(CrmSession session, String entryId) {
 		return "TODO";
 	}
 
@@ -156,7 +173,7 @@ public class SugarServiceV4Impl {
 		}
 	}
 
-	protected String getSetEntryPayload(SugarSession session, String module,
+	protected String getSetEntryPayload(CrmSession session, String module,
 			String nameValueList)
 			throws UnsupportedEncodingException {
 		String query = queries.getProperty("set_entry");
@@ -164,10 +181,22 @@ public class SugarServiceV4Impl {
 				nameValueList);
 	}
 
-	protected String getSetRelationshipPayload(SugarSession session,
+	protected String getSetRelationshipPayload(CrmSession session,
 			String moduleName, String parentId, String linkField, String linkId) {
 		String query = queries.getProperty("set_relationship");
 		return String.format(query, session.getSessionId(), moduleName,
 				parentId, linkField, linkId);
+	}
+
+	public String getModuleFields(CrmSession session, String moduleName)
+			throws IOException {
+		return doPost(new URL(getServiceUrl(session.getSugarUrl())),
+				getModuleFieldsPayload(session, moduleName));
+	}
+
+	protected String getModuleFieldsPayload(CrmSession session,
+			String moduleName) {
+		String query = queries.getProperty("get_module_fields");
+		return String.format(query, session.getSessionId(), moduleName);
 	}
 }

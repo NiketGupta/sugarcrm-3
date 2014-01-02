@@ -1,10 +1,29 @@
+/*
+ * A Java client library to interact with the Sugar CRM REST API.
+ * Copyright (C) 2013-2014 Tim Stephenson (tim@knowprocess.com)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.knowprocess.sugarcrm.api;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class SugarSession implements Serializable {
+import com.knowprocess.crm.CrmSession;
+
+public class SugarSession implements Serializable, CrmSession {
 
 	/**
 	 * 
@@ -27,6 +46,9 @@ public class SugarSession implements Serializable {
 		this.sugarUrl = sugarUrl;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.knowprocess.sugarcrm.api.CrmSession#getSessionId()
+	 */
 	public String getSessionId() {
 		return sessionId;
 	}
@@ -35,6 +57,9 @@ public class SugarSession implements Serializable {
 		this.sessionId = sessionId;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.knowprocess.sugarcrm.api.CrmSession#getUsername()
+	 */
 	public String getUsername() {
 		return username;
 	}
@@ -51,6 +76,9 @@ public class SugarSession implements Serializable {
 		this.password = password;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.knowprocess.sugarcrm.api.CrmSession#getSugarUrl()
+	 */
 	public String getSugarUrl() {
 		return sugarUrl;
 	}
@@ -59,10 +87,8 @@ public class SugarSession implements Serializable {
 		this.sugarUrl = sugarUrl;
 	}
 
-	/**
-	 * 
-	 * @return true if 'valid' session. Note this does not connect to a server
-	 *         so is a 'necessary but not sufficient' test.
+	/* (non-Javadoc)
+	 * @see com.knowprocess.sugarcrm.api.CrmSession#isValid()
 	 */
 	public boolean isValid() {
 		if (username == null || password == null || sugarUrl == null ) {

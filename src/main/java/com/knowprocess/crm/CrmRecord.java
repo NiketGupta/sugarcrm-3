@@ -15,26 +15,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.knowprocess.sugarcrm.api;
+package com.knowprocess.crm;
 
-public class SugarException extends RuntimeException {
+import java.util.HashMap;
+import java.util.Map;
 
-	private static final long serialVersionUID = -6622157312720254155L;
+import com.knowprocess.sugarcrm.api.SugarService;
 
-	public SugarException() {
-		super();
+/**
+ * Common ancestor model for all CRM records.
+ * 
+ * @author timstephenson
+ * 
+ */
+public abstract class CrmRecord {
+
+	protected String id;
+
+	protected Map<String, Object> properties = new HashMap<String, Object>();
+
+	public String getId() {
+		return id;
 	}
 
-	public SugarException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public SugarException(String arg0) {
-		super(arg0);
+	public Object getCustom(String name) {
+		return properties.get(name);
 	}
 
-	public SugarException(Throwable arg0) {
-		super(arg0);
+	public void setCustom(String name, Object value) {
+		properties.put(name, value);
+	}
+
+	public String getNameValueListAsJson() {
+		return SugarService.getNameValueListAsJson(properties);
 	}
 
 }

@@ -15,26 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.knowprocess.sugarcrm.api;
+package com.knowprocess.crm;
 
-public class SugarException extends RuntimeException {
+/**
+ * @author timstephenson
+ * 
+ */
+public interface CrmSession {
 
-	private static final long serialVersionUID = -6622157312720254155L;
+	String getSessionId();
 
-	public SugarException() {
-		super();
-	}
+	String getUsername();
 
-	public SugarException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-	}
+	String getSugarUrl();
 
-	public SugarException(String arg0) {
-		super(arg0);
-	}
-
-	public SugarException(Throwable arg0) {
-		super(arg0);
-	}
+	/**
+	 * 
+	 * @return true if 'valid' session. Note this does not connect to a server
+	 *         so is a 'necessary but not sufficient' test.
+	 */
+	boolean isValid();
 
 }

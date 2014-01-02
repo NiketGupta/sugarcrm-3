@@ -1,8 +1,31 @@
 Sugar CRM Java Client 
 =====================
 
+A Java client library to interact with the Sugar CRM REST API.
+Copyright (C) 2013-2014 Tim Stephenson (tim@knowprocess.com)
+Licensed under GPL v3 (http://www.gnu.org/licenses/)
+
+Motivations 
+-----------
+This library is born out of a need to interact with Sugar from Java with as few 
+dependencies as possible so as to make it very easily embeddable in a variety 
+of applications on server and client side. 
+
+Sugar is a large system and this library focuses on support for just the APIs 
+that are needed making no attempt to be complete (at least for now). If you need
+another API please get in touch.  
+
+Finally, there is a CrmService interface which _may_ allow other CRM systems 
+to be accessed using a common client API. This is not the main focus of the 
+library at this time but could perhaps be developed in the future. 
+
+Getting Started
+---------------
+
+
 Known Issues 
 ------------
+
 
 0.1 - 24 Dec 13 - 
 -----------------

@@ -15,26 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.knowprocess.sugarcrm.api;
+package com.knowprocess.crm;
 
-public class SugarException extends RuntimeException {
+public interface CrmService {
 
-	private static final long serialVersionUID = -6622157312720254155L;
+	CrmSession login(CrmSession session);
 
-	public SugarException() {
-		super();
-	}
+	CrmRecord createAccount(CrmSession session, CrmRecord acct);
 
-	public SugarException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-	}
+	CrmRecord createContact(CrmSession session, CrmRecord contact);
 
-	public SugarException(String arg0) {
-		super(arg0);
-	}
+	CrmRecord createAccountWithPrimeContact(CrmSession session,
+			CrmRecord contact, CrmRecord acct);
 
-	public SugarException(Throwable arg0) {
-		super(arg0);
-	}
+	CrmRecord createLead(CrmSession session, CrmRecord lead);
+
+	CrmRecord getContact(CrmSession session, String contactId);
 
 }
