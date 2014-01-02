@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.knowprocess</groupId>
   <artifactId>sugarcrm</artifactId>
-  <version>0.1</version>
+  <version>0.2</version>
   <name>Sugar CRM client library</name>
   <dependencies>
   	<dependency>
