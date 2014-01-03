@@ -107,12 +107,4 @@ public class SugarContact extends CrmPerson implements Serializable {
 		properties.put("do_not_call", Boolean.valueOf(doNotCall));
 	}
 
-	public String getRealSource() {
-		return (String) properties.get("real_source_c");
-	}
-
-	public void setRealSource(String realSource) {
-		properties.put("real_source_c", realSource);
-	}
-
 }
