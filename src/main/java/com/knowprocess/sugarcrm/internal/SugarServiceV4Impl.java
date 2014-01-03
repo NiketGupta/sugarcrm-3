@@ -51,7 +51,7 @@ public class SugarServiceV4Impl {
 	public String login(SugarSession session) throws IOException {
 		if (!session.isValid()) {
 			throw new IllegalArgumentException(
-					"Session is not incompletely specified");
+					"Session is incompletely specified");
 		}
 		URL url = new URL(getServiceUrl(session.getSugarUrl()) + "?"
 				+ getLoginPayload(session));
