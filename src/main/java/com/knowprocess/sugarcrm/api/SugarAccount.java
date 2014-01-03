@@ -28,10 +28,6 @@ public class SugarAccount extends CrmRecord implements Serializable {
 	 */
 	private static final long serialVersionUID = 190044867985297262L;
 
-	private String website;
-
-	private int employees;
-
 	public SugarAccount() {
 		;
 	}
@@ -45,7 +41,7 @@ public class SugarAccount extends CrmRecord implements Serializable {
 	}
 
 	public String getWebsite() {
-		return website;
+		return (String) properties.get("website");
 	}
 
 	public void setWebsite(String website) {
@@ -53,7 +49,8 @@ public class SugarAccount extends CrmRecord implements Serializable {
 	}
 
 	public int getEmployees() {
-		return employees;
+		return ((Integer) properties.get("employees")) == null ? 0
+				: ((Integer) properties.get("employees")).intValue();
 	}
 
 	public void setEmployees(int employees) {
