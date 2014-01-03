@@ -40,13 +40,17 @@ public class SugarSession implements Serializable, CrmSession {
 	}
 
 	public SugarSession(String username, String password, String sugarUrl) {
-		super();
+		this();
 		this.username = username;
 		this.password = password;
 		this.sugarUrl = sugarUrl;
+		if (!isValid()) {
+			throw new IllegalArgumentException(
+					"Please check Username, Password and URL supplied.");
+		}
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see com.knowprocess.sugarcrm.api.CrmSession#getSessionId()
 	 */
 	public String getSessionId() {
@@ -57,7 +61,7 @@ public class SugarSession implements Serializable, CrmSession {
 		this.sessionId = sessionId;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see com.knowprocess.sugarcrm.api.CrmSession#getUsername()
 	 */
 	public String getUsername() {
@@ -76,7 +80,7 @@ public class SugarSession implements Serializable, CrmSession {
 		this.password = password;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see com.knowprocess.sugarcrm.api.CrmSession#getSugarUrl()
 	 */
 	public String getSugarUrl() {
@@ -87,7 +91,7 @@ public class SugarSession implements Serializable, CrmSession {
 		this.sugarUrl = sugarUrl;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see com.knowprocess.sugarcrm.api.CrmSession#isValid()
 	 */
 	public boolean isValid() {
