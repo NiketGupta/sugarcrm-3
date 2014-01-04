@@ -18,6 +18,7 @@
 package com.knowprocess.sugarcrm.api;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import com.knowprocess.crm.CrmPerson;
 
@@ -26,6 +27,22 @@ public class SugarLead extends CrmPerson implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7802082881477376628L;
+	private static final long serialVersionUID = -7522929479604477420L;
 
+	public Date getDateEntered() {
+		return (Date) properties.get("date_entered");
+	}
+
+	public void setDateEntered(Date value) {
+		properties.put("date_entered", value);
+	}
+
+	public String getDescription() {
+		return (String) properties.get("description");
+	}
+
+	public void setDescription(String value) {
+		properties.put("description", value);
+	}
+	
 }
