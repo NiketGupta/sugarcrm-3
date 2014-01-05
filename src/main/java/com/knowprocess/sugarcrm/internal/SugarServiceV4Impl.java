@@ -31,6 +31,7 @@ import java.util.Properties;
 import com.knowprocess.crm.CrmRecord;
 import com.knowprocess.crm.CrmSession;
 import com.knowprocess.sugarcrm.api.SugarAuthenticationException;
+import com.knowprocess.sugarcrm.api.SugarException;
 import com.knowprocess.sugarcrm.api.SugarService;
 import com.knowprocess.sugarcrm.api.SugarSession;
 
@@ -65,7 +66,7 @@ public class SugarServiceV4Impl {
 			byte[] b = new byte[1024];
 			is = (InputStream) url.getContent();
 			while (is.read(b) != -1) {
-				response.append(new String(b));
+				response.append(new String(b).trim());
 			}
 		} finally {
 			try {
@@ -87,6 +88,8 @@ public class SugarServiceV4Impl {
 		System.out.println("response: " + s);
 		if (s.indexOf("Invalid Login") != -1) {
 			throw new SugarAuthenticationException();
+		} else if (s.trim().equals("null")) {
+			throw new SugarException("No response received.");
 		}
 		int start = s.indexOf(ID_MARKER) + ID_MARKER.length();
 		String id = s.substring(start, s.indexOf('"', start));
@@ -119,7 +122,7 @@ public class SugarServiceV4Impl {
 			byte[] b = new byte[1024];
 			is = (InputStream) connection.getContent();
 			while (is.read(b) != -1) {
-				response.append(new String(b));
+				response.append(new String(b).trim());
 			}
 			connection.disconnect();
 		} finally {
