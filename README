@@ -28,8 +28,10 @@ Known Issues
 
 0.2 - - 
 -----------------
-- Added createLead and getContact.
+- Added createLead, searchContact and getContact.
 - Refactored to introduce CRM interface (potentially) abstracted of Sugar.
+- Added dependency on JSON-P (JSR 353) reference implementation for more 
+  robust JSON handling. 
 
 0.1 - 24 Dec 13 - 
 -----------------

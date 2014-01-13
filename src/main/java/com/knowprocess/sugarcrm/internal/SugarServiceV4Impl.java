@@ -20,13 +20,24 @@ package com.knowprocess.sugarcrm.internal;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 
 import com.knowprocess.crm.CrmRecord;
 import com.knowprocess.crm.CrmSession;
@@ -40,6 +51,7 @@ public class SugarServiceV4Impl {
 	private static final String NAME_MARKER = "\"name\":\"";
 	private static final String ID_MARKER = "\"id\":\"";
 	private static final String VALUE_MARKER = "\"value\":\"";
+
 	private Properties queries;
 	private MessageDigest md;
 
@@ -85,7 +97,7 @@ public class SugarServiceV4Impl {
 	}
 
 	private String parseId(String s) {
-		System.out.println("response: " + s);
+		// System.out.println("response: " + s);
 		if (s.indexOf("Invalid Login") != -1) {
 			throw new SugarAuthenticationException();
 		} else if (s.trim().equals("null")) {
@@ -154,17 +166,18 @@ public class SugarServiceV4Impl {
 
 	public CrmRecord getEntry(CrmSession session, String moduleName,
 			String contactId) throws IOException {
-		URL url = new URL(getServiceUrl(session.getSugarUrl())
-				+ getGetEntryPayload(session, moduleName, contactId, ""));
-		String entry = doGet(url);
+		URL url = new URL(getServiceUrl(session.getSugarUrl()));
+		String entry = doPost(url,
+				getGetEntryPayload(session, moduleName, contactId, ""));
 		return parseRecordFromJson(entry);
 	}
 
-	CrmRecord parseRecordFromJson(String entry) {
+	protected CrmRecord parseRecordFromJson(String entry) {
 		CrmRecord record = new CrmRecord();
 		String[] nameValues = entry.split("\\{");
 		for (String nameValue : nameValues) {
-			if (nameValue.length() > 0) {
+			if (nameValue != null && !nameValue.equals("null")
+					&& nameValue.length() > 0) {
 				int nStart = nameValue.indexOf(NAME_MARKER)
 						+ NAME_MARKER.length();
 				int vStart = nameValue.indexOf(VALUE_MARKER)
@@ -179,6 +192,21 @@ public class SugarServiceV4Impl {
 		return record;
 	}
 
+	protected CrmRecord parseRecordFromJson1(String response) {
+		JsonReader reader = Json.createReader(new StringReader(response));
+		JsonObject value = reader.readObject();
+		System.out.println("value:" + value);
+		reader.close();
+
+		CrmRecord record = new CrmRecord();
+		for (Entry<String, JsonValue> entry : value.entrySet()) {
+			if (entry.getValue() != null && !entry.getValue().equals("null")) {
+				record.setCustom(entry.getKey(), entry.getValue());
+			}
+		}
+		return record;
+	}
+
 	protected String getLoginPayload(SugarSession session)
 			throws UnsupportedEncodingException {
 		String query = queries.getProperty("login");
@@ -187,7 +215,7 @@ public class SugarServiceV4Impl {
 				SugarService.class.getName());
 	}
 
-	public String hash(String plainPassword)
+	protected String hash(String plainPassword)
 			throws UnsupportedEncodingException {
 		md.reset();
 		md.update(plainPassword.getBytes("UTF-8"));
@@ -196,7 +224,7 @@ public class SugarServiceV4Impl {
 		return hashtext;
 	}
 
-	public String getServiceUrl(String sugarUrl) {
+	protected String getServiceUrl(String sugarUrl) {
 		if (sugarUrl.endsWith("/")) {
 			return sugarUrl + "service/v4/rest.php";
 		} else {
@@ -236,5 +264,64 @@ public class SugarServiceV4Impl {
 			String moduleName) {
 		String query = queries.getProperty("get_module_fields");
 		return String.format(query, session.getSessionId(), moduleName);
+	}
+
+	public List<CrmRecord> search(CrmSession session, String module,
+			CrmRecord query, int offset, int maxResults) throws IOException {
+		URL url = new URL(getServiceUrl(session.getSugarUrl()));
+		String response = doPost(url,
+				getSearchPayload(session, module, query, offset, maxResults));
+		return parseRecordsFromJson(response);
+	}
+
+	public List<CrmRecord> parseRecordsFromJson(String response) {
+		System.out.println("response: " + response);
+		JsonReader reader = Json.createReader(new StringReader(response));
+		JsonObject value = reader.readObject();
+		// System.out.println("value:" + value);
+		reader.close();
+		JsonArray array = value.getJsonArray("entry_list");
+		ArrayList<CrmRecord> list = new ArrayList<CrmRecord>();
+		for (Iterator<JsonValue> it = array.listIterator(); it.hasNext();) {
+			JsonValue next = it.next();
+			list.add(parseRecordFromJson(next.toString()));
+			// list.add(new CrmRecord());
+		}
+		return list;
+	}
+
+	protected String getSearchPayload(CrmSession session, String moduleName,
+			CrmRecord queryObject, int offset, int maxResults) {
+		String query = queries.getProperty("search_by_module");
+		return String.format(query, session.getSessionId(), moduleName,
+				queryObject.getSearchString(), offset, maxResults,
+				session.getUsername(), "");
+	}
+
+	public List<CrmRecord> getEntryList(CrmSession session, String moduleName,
+			CrmRecord query, int offset, int maxResults) throws IOException {
+		URL url = new URL(getServiceUrl(session.getSugarUrl()));
+		String response = doPost(
+				url,
+				getGetEntryListPayload(session, moduleName,
+						query.getWhereClause(moduleName.toLowerCase()), offset,
+						maxResults));
+		return parseRecordsFromJson(response);
+	}
+
+	protected String getGetEntryListPayload(CrmSession session, String module,
+			String whereClause, int offset, int maxResults) {
+		String query = queries.getProperty("get_entry_list");
+		return String.format(query, session.getSessionId(), module,
+				whereClause, "",
+				offset, maxResults);
+	}
+
+	public String toJson(List<CrmRecord> list) {
+		StringBuilder sb = new StringBuilder("[");
+		for (CrmRecord crmRecord : list) {
+			sb.append(crmRecord.toJson());
+		}
+		return sb.append("]").toString();
 	}
 }

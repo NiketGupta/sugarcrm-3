@@ -19,9 +19,11 @@ package com.knowprocess.sugarcrm.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -145,6 +147,44 @@ public class SugarServiceV4ImplTest {
 			assertEquals("John", record.getCustom("first_name"));
 			assertEquals("Braithwaite", record.getCustom("last_name"));
 			assertEquals("Mr", record.getCustom("title"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ":" + e.getMessage());
+		}
+	}
+
+	@Test
+	public void testParseRecordsFromJsonArray() {
+		try {
+			String json = "{\"result_count\":20,\"total_count\":\"111\",\"next_offset\":40,"
+					+ "\"entry_list\":["
+					+ "{\"id\":\"4992b0c1-c058-cfd3-845c-52c55a433d0c\","
+					+ "\"module_name\":\"Contacts\",\"name_value_list\":{"
+					+ "\"assigned_user_name\":{\"name\":\"assigned_user_name\",\"value\":\"\"},"
+					+ "\"modified_by_name\":{\"name\":\"modified_by_name\",\"value\":\"Tim Stephenson\"},"
+					+ "\"created_by_name\":{\"name\":\"created_by_name\",\"value\":\"Tim Stephenson\"},"
+					+ "\"id\":{\"name\":\"id\",\"value\":\"4992b0c1-c058-cfd3-845c-52c55a433d0c\"},"
+					+ "\"name\":{\"name\":\"name\",\"value\":\"John Braithwaite\"},"
+					+ "\"date_entered\":{\"name\":\"date_entered\",\"value\":\"2014-01-02 12:24:34\"},"
+					+ "\"date_modified\":{\"name\":\"date_modified\",\"value\":\"2014-01-02 12:24:34\"},"
+					+ "\"modified_user_id\":{\"name\":\"modified_user_id\",\"value\":\"1\"},"
+					+ "\"created_by\":{\"name\":\"created_by\",\"value\":\"1\"},"
+					+ "\"description\":{\"name\":\"description\",\"value\":\"\"},"
+					+ "\"deleted\":{\"name\":\"deleted\",\"value\":\"0\"},"
+					+ "\"assigned_user_id\":{\"name\":\"assigned_user_id\",\"value\":\"\"},"
+					+ "\"salutation\":{\"name\":\"salutation\",\"value\":\"Mr\"},"
+					+ "\"first_name\":{\"name\":\"first_name\",\"value\":\"John\"},"
+					+ "\"last_name\":{\"name\":\"last_name\",\"value\":\"Braithwaite\"},"
+					+ "\"full_name\":{\"name\":\"full_name\",\"value\":\"John Braithwaite\"}}},"
+					+ "{\"id\":\"id-the-second\"}" + "]}";
+//					,"title":{"name":"title","value":"Mr"},"department":{"name":"department","value":""},"do_not_call":{"name":"do_not_call","value":"0"},"phone_home":{"name":"phone_home","value":""},"email":{"name":"email","value":""},"phone_mobile":{"name":"phone_mobile","value":""},"phone_work":{"name":"phone_work","value":""},"phone_other":{"name":"phone_other","value":""},"phone_fax":{"name":"phone_fax","value":""},"email1":{"name":"email1","value":""},"email2":{"name":"email2","value":""},"invalid_email":{"name":"invalid_email","value":""},"email_opt_out":{"name":"email_opt_out","value":""},"primary_address_street":{"name":"primary_address_street","value":""},"primary_address_street_2":{"name":"primary_address_street_2","value":""},"primary_address_street_3":{"name":"primary_address_street_3","value":""},"primary_address_city":{"name":"primary_address_city","value":""},"primary_address_state":{"name":"primary_address_state","value":""},"primary_address_postalcode":{"name":"primary_address_postalcode","value":""},"primary_address_country":{"name":"primary_address_country","value":""},"alt_address_street":{"name":"alt_address_street","value":""},"alt_address_street_2":{"name":"alt_address_street_2","value":""},"alt_address_street_3":{"name":"alt_address_street_3","value":""},"alt_address_city":{"name":"alt_address_city","value":""},"alt_address_state":{"name":"alt_address_state","value":""},"alt_address_postalcode":{"name":"alt_address_postalcode","value":""},"alt_address_country":{"name":"alt_address_country","value":""},"assistant":{"name":"assistant","value":""},"assistant_phone":{"name":"assistant_phone","value":""},"email_addresses_non_primary":{"name":"email_addresses_non_primary","value":""},"email_and_name1":{"name":"email_and_name1","value":"John Braithwaite &lt;&gt;"},"lead_source":{"name":"lead_source","value":""},"account_name":{"name":"account_name","value":"Ergo Digital"},"account_id":{"name":"account_id","value":"8b97f06a-2cea-8b26-0a17-52c55a4a1be9"},"opportunity_role_fields":{"name":"opportunity_role_fields","value":"                                                                                                                                                                                                                                                              "},"opportunity_role_id":{"name":"opportunity_role_id","value":""},"opportunity_role":{"name":"opportunity_role","value":""},"reports_to_id":{"name":"reports_to_id","value":""},"report_to_name":{"name":"report_to_name","value":""},"birthdate":{"name":"birthdate","value":false},"campaign_id":{"name":"campaign_id","value":""},"campaign_name":{"name":"campaign_name","value":""}}]";
+			List<CrmRecord> records = svc.parseRecordsFromJson(json);
+			assertTrue("Wrong number of records parsed", records.size() == 2);
+			CrmRecord record = records.get(0);
+			assertNotNull(record);
+			assertEquals("John", record.getCustom("first_name"));
+			assertEquals("Braithwaite", record.getCustom("last_name"));
+			assertEquals("Mr", record.getCustom("salutation"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getClass().getName() + ":" + e.getMessage());

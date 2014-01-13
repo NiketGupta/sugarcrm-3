@@ -2,6 +2,10 @@ package com.knowprocess.crm;
 
 public class CrmPerson extends CrmRecord {
 
+	public CrmPerson() {
+		super();
+	}
+
 	public String getFirstName() {
 		return (String) properties.get("first_name");
 	}

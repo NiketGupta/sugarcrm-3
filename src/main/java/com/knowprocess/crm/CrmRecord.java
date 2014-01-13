@@ -17,8 +17,16 @@
  */
 package com.knowprocess.crm;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 
 import com.knowprocess.sugarcrm.api.SugarService;
 
@@ -29,10 +37,16 @@ import com.knowprocess.sugarcrm.api.SugarService;
  * 
  */
 public class CrmRecord {
+	public static final DateFormat iso = new SimpleDateFormat(
+			"yyyy-MM-dd'T'hh:mm:ss");
 
 	protected String id;
 
 	protected Map<String, Object> properties = new HashMap<String, Object>();
+
+	public CrmRecord() {
+		super();
+	}
 
 	public String getId() {
 		return id;
@@ -40,6 +54,10 @@ public class CrmRecord {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Map<String, Object> getProperties() {
+		return properties;
 	}
 
 	public Object getCustom(String name) {
@@ -54,4 +72,61 @@ public class CrmRecord {
 		return SugarService.getNameValueListAsJson(properties);
 	}
 
+	// This works fine in theory but passing to search_by_module API always
+	// returns no matches. Hence using get_entry and get_entry_list instead
+	public String getSearchString() {
+		StringBuffer sb = new StringBuffer();
+		for (Iterator<Entry<String, Object>> it = properties.entrySet()
+				.iterator(); it.hasNext();) {
+			Entry<String, Object> e = it.next();
+			sb.append(" ");
+			if (e.getValue() instanceof Date) {
+				// sb.append(isoFormat.format(e.getValue()));
+			} else {
+				sb.append(e.getValue());
+			}
+		}
+		return sb.toString().trim();
+	}
+
+	public String getWhereClause(String tableName) {
+		StringBuffer sb = new StringBuffer();
+		if (getId() != null) {
+			sb.append(" ").append(tableName).append(".id = '").append(getId())
+					.append("'");
+		}
+		for (Iterator<Entry<String, Object>> it = properties.entrySet()
+				.iterator(); it.hasNext();) {
+			Entry<String, Object> e = it.next();
+			if (getId() != null) {
+				sb.append(" AND ");
+			} else {
+				sb.append(" ");
+			}
+			if (e.getValue() instanceof Date) {
+				// sb.append(isoFormat.format(e.getValue()));
+			} else {
+				sb.append(tableName).append(".").append(e.getKey());
+				sb.append(" = '").append(e.getValue()).append("'");
+				if (it.hasNext()) {
+					sb.append(" AND");
+				}
+			}
+		}
+		return sb.toString();
+	}
+
+	public String toJson() {
+		JsonObjectBuilder bldr = Json.createObjectBuilder();
+		for (Entry<String, Object> entry : properties.entrySet()) {
+			if (entry.getValue() == null) {
+				// ignore
+			} else if (entry.getValue() instanceof Date) {
+				bldr.add(entry.getKey(), iso.format(entry.getValue()));
+			} else {
+				bldr.add(entry.getKey(), entry.getValue().toString());
+			}
+		}
+		return bldr.build().toString();
+	}
 }

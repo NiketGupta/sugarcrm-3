@@ -18,6 +18,7 @@
 package com.knowprocess.crm;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface CrmService {
 
@@ -34,5 +35,10 @@ public interface CrmService {
 
 	CrmRecord getContact(CrmSession session, String contactId)
 			throws IOException;
+
+	List<CrmRecord> searchContacts(CrmSession session, CrmRecord query,
+			int offset, int maxResults) throws IOException;
+
+	String toJson(List<CrmRecord> list);
 
 }

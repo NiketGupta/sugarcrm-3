@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.knowprocess.crm.CrmPerson;
+import com.knowprocess.crm.CrmRecord;
 
 /**
  * Represents a Contact in Sugar.
@@ -34,6 +35,15 @@ public class SugarContact extends CrmPerson implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1453955943706835232L;
+
+	public SugarContact() {
+		super();
+	}
+
+	public SugarContact(CrmRecord crmRecord) {
+		this();
+		this.properties = crmRecord.getProperties();
+	}
 
 	public String getModifiedByName() {
 		return (String) properties.get("modified_by_name");

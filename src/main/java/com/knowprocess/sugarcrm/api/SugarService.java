@@ -18,8 +18,10 @@
 package com.knowprocess.sugarcrm.api;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -150,7 +152,36 @@ public class SugarService implements CrmService {
 	 */
 	public CrmRecord getContact(CrmSession session, String contactId)
 			throws IOException {
-		return impl.getEntry(session, "Contacts", contactId);
+		return new SugarContact(impl.getEntry(session, "Contacts", contactId));
+	}
+
+	/**
+	 * 
+	 * @param offset
+	 * @param maxResults
+	 * @throws IOException
+	 * @see com.knowprocess.crm.api.CrmService#getContact(com.knowprocess.crm
+	 *      .api.CrmSession, java.lang.String)
+	 */
+	public List<CrmRecord> searchContacts(CrmSession session, CrmRecord query,
+			int offset, int maxResults) throws IOException {
+		// Note that calling getEntryList with id='x' seems not to return work,
+		// hence this workaround
+
+		// Note 2: No success getting any result from search_by_module
+		List<CrmRecord> list = null;
+		if (query.getId() == null) {
+			list = impl.getEntryList(session, "Contacts", query, offset,
+					maxResults);
+		} else {
+			list = new ArrayList<CrmRecord>();
+			list.add(impl.getEntry(session, "Contacts", query.getId()));
+		}
+		List<CrmRecord> typedList = new ArrayList<CrmRecord>();
+		for (CrmRecord crmRecord : list) {
+			typedList.add(new SugarContact(crmRecord));
+		}
+		return typedList;
 	}
 
 	public static String getNameValueListAsJson(Map<String, Object> properties) {
@@ -172,5 +203,9 @@ public class SugarService implements CrmService {
 			}
 		}
 		return sb.toString();
+	}
+
+	public String toJson(List<CrmRecord> list) {
+		return impl.toJson(list);
 	}
 }

@@ -1,4 +1,4 @@
-method=set_entry
+method=get_entry
 &input_type=json
 &response_type=json
 &rest_data={
