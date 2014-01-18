@@ -152,7 +152,7 @@ public class SugarService implements CrmService {
 	 */
 	public CrmRecord getContact(CrmSession session, String contactId)
 			throws IOException {
-		return new SugarContact(impl.getEntry(session, "Contacts", contactId));
+		return new SugarContact(impl.getEntry(session, "Contacts", contactId, ""));
 	}
 
 	/**
@@ -160,8 +160,8 @@ public class SugarService implements CrmService {
 	 * @param offset
 	 * @param maxResults
 	 * @throws IOException
-	 * @see com.knowprocess.crm.api.CrmService#getContact(com.knowprocess.crm
-	 *      .api.CrmSession, java.lang.String)
+	 * @see com.knowprocess.crm.api.CrmService#searchContacts(com.knowprocess.crm
+	 *      .api.CrmSession, com.knowprocess.crm .api.CrmRecord, int, int)
 	 */
 	public List<CrmRecord> searchContacts(CrmSession session, CrmRecord query,
 			int offset, int maxResults) throws IOException {
@@ -171,11 +171,11 @@ public class SugarService implements CrmService {
 		// Note 2: No success getting any result from search_by_module
 		List<CrmRecord> list = null;
 		if (query.getId() == null) {
-			list = impl.getEntryList(session, "Contacts", query, offset,
-					maxResults);
+			list = impl.getEntryList(session, "Contacts", query, 
+					/* order by */" contacts.last_name ", offset, maxResults);
 		} else {
 			list = new ArrayList<CrmRecord>();
-			list.add(impl.getEntry(session, "Contacts", query.getId()));
+			list.add(impl.getEntry(session, "Contacts", query.getId(), ""));
 		}
 		List<CrmRecord> typedList = new ArrayList<CrmRecord>();
 		for (CrmRecord crmRecord : list) {

@@ -154,6 +154,28 @@ public class SugarServiceV4ImplTest {
 	}
 
 	@Test
+	public void testParseRecordFromSugarSerialisation() {
+		try {
+			String json = "{\"entry_list\":["
+					+ "{\"id\":\"52cd2f26-6497-6ac6-8389-52d69314b6cc\","
+					+ "\"module_name\":\"Contacts\",\"name_value_list\":{"
+					+ "\"id\":{\"name\":\"id\",\"value\":\"52cd2f26-6497-6ac6-8389-52d69314b6cc\"},"
+					+ "\"first_name\":{\"name\":\"first_name\",\"value\":\"John\"},"
+					+ "\"last_name\":{\"name\":\"last_name\",\"value\":\"Braithwaite\"},"
+					+ "\"salutation\":{\"name\":\"salutation\",\"value\":\"Mr\"}}"
+					+ "}],"
+					+ "\"relationship_list\":[]}";
+			CrmRecord record = svc.parseRecordFromJson(json);
+			assertNotNull(record);
+			assertEquals("John", record.getCustom("first_name"));
+			assertEquals("Braithwaite", record.getCustom("last_name"));
+			assertEquals("Mr", record.getCustom("salutation"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ":" + e.getMessage());
+		}
+	}
+	@Test
 	public void testParseRecordsFromJsonArray() {
 		try {
 			String json = "{\"result_count\":20,\"total_count\":\"111\",\"next_offset\":40,"

@@ -17,6 +17,7 @@
  */
 package com.knowprocess.crm;
 
+import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,7 +27,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
 
 import com.knowprocess.sugarcrm.api.SugarService;
 
@@ -65,6 +70,7 @@ public class CrmRecord {
 	}
 
 	public void setCustom(String name, Object value) {
+		//System.out.println("Setting '" + name + "' to '" + value + "'");
 		properties.put(name, value);
 	}
 
@@ -113,6 +119,7 @@ public class CrmRecord {
 				}
 			}
 		}
+		sb.append(" ");
 		return sb.toString();
 	}
 
@@ -128,5 +135,27 @@ public class CrmRecord {
 			}
 		}
 		return bldr.build().toString();
+	}
+
+	public static CrmRecord parseFromJson(String json) {
+		CrmRecord record = new CrmRecord();
+
+		JsonParser parser = Json.createParser(new StringReader(json));
+		while (parser.hasNext()) {
+			Event e = parser.next();
+			if (e == Event.KEY_NAME) {
+				// System.out.println(parser.getString());
+				// System.out.println(parser.getLocation());
+				int start = json.indexOf('"', (int) parser.getLocation()
+						.getStreamOffset() + 1);
+				record.setCustom(parser.getString(),
+						json.substring(start + 1, json.indexOf('"', start + 1)));
+			}
+		}
+		JsonReader reader = Json.createReader(new StringReader(json));
+		JsonObject obj = reader.readObject();
+		//System.out.println("obj" + obj);
+
+		return record;
 	}
 }

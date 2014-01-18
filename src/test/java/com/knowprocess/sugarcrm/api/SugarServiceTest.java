@@ -20,12 +20,15 @@ package com.knowprocess.sugarcrm.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.knowprocess.crm.CrmPerson;
@@ -38,6 +41,8 @@ public class SugarServiceTest {
 
 	private static CrmService svc;
 
+	private CrmPerson contact;
+
 	@BeforeClass
 	public static void setUpClass() {
 		String usr = System.getProperty("sugar.username");
@@ -47,6 +52,14 @@ public class SugarServiceTest {
 				pwd == null ? "sugar" : pwd,
 				url == null ? "http://localhost/sugarcrm" : url);
 		svc = new SugarService();
+	}
+
+	@Before
+	public void setUp() {
+		contact = new SugarContact();
+		contact.setFirstName("John");
+		contact.setLastName("Braithwaite");
+		contact.setTitle("Mr");
 	}
 
 	@Test
@@ -98,49 +111,66 @@ public class SugarServiceTest {
 		try {
 			svc.login(session);
 
-			CrmPerson contact = new SugarContact();
-			contact.setFirstName("John");
-			contact.setLastName("Braithwaite");
-			contact.setTitle("Mr");
-
 			SugarAccount acct = new SugarAccount();
 			acct.setName("Ergo Digital");
 
 			svc.createAccountWithPrimeContact(session, contact, acct);
 
-			// System.out.println("contact:" +
-			// contact.getNameValueListAsJson());
+			System.out.println("contact created with id:" + contact.getId());
 			assertNotNull(contact.getId());
 
 			// Check can find contact by its id
 			CrmRecord contact2 = svc.getContact(session, contact.getId());
 			assertContacts(contact, new SugarContact(contact2));
 
-			// Check can find contact by its properties
+			// Check can find contact by newly created id
 			SugarContact queryObject = new SugarContact();
-			queryObject.setFirstName("John");
-			queryObject.setLastName("Braithwaite");
+			queryObject.setId(contact.getId());
 			List<CrmRecord> results = svc.searchContacts(session, queryObject,
 					0, 10);
 			assertTrue(results.size() >= 1);
 			assertContacts(contact, new SugarContact(results.get(0)));
-
-			// check can get contact by newly created id
-			queryObject = new SugarContact();
-			queryObject.setId(contact.getId());
-			results = svc.searchContacts(session, queryObject, 0, 10);
-			assertTrue(results.size() >= 1);
-			assertContacts(contact, new SugarContact(results.get(0)));
 		} catch (IllegalStateException e) {
+			System.out.println(e.getMessage());
 			Assume.assumeTrue(e.getMessage(), true);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	@Test
+	@Ignore
+	/*
+	 * This fails with 500 on local and on prod with: Unsupported operand types
+	 * in <b>/var/sites
+	 * /s/sugar.syncapt.com/public_html/service/v4/SugarWebServiceImplv4.php</b>
+	 * on line <b>315</b>
+	 */
+	public void searchContactsByNameTest() {
+		try {
+			svc.login(session);
+
+			// Check can find contact by its properties
+			SugarContact queryObject = new SugarContact();
+			queryObject.setFirstName("John");
+			// queryObject.setLastName("Braithwaite");
+			List<CrmRecord> results = svc.searchContacts(session, queryObject,
+					0, 10);
+			assertTrue(results.size() >= 1);
+
+			for (CrmRecord crmRecord : results) {
+				System.out.println("Checking: " + crmRecord.toJson());
+				assertContacts(contact, new SugarContact(crmRecord));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 
 	private void assertContacts(CrmPerson expected, SugarContact crmRecord) {
-
+		System.out.println("returned: " + crmRecord.toJson());
 		// This is what we get back
 		// {"name":"opportunity_role_id","value":""},{"name":"primary_address_city","value":""},{"name":"assigned_user_id","value":""},{"name":"sync_contact","value":""},{"name":"primary_address_postalcode","value":""},{"name":"first_name","value":"John"},{"name":"phone_fax","value":""},{"name":"assistant","value":""},{"name":"invalid_email","value":""},{"name":"description","value":""},{"name":"ed_user_name","value":"d_user_name"},{"name":"accept_status_id","value":""},{"name":"created_by","value":"1"},{"name":"assistant_phone","value":""},{"name":"account_id","value":"1fc672a4-3d13-2b94-d94b-52cb1490d2e3"},{"name":"alt_address_state","value":""},{"name":"campaign_name","value":""},{"name":"modified_user_id","value":"1"},{"name":"deleted","value":"0"},{"name":"campaign_id","value":""},{"name":"report_to_name","value":""},{"name":"account_name","value":"Ergo Digital"},{"name":"phone_home","value":""},{"name":"alt_address_street","value":""},{"name":"lead_source","value":""},{"name":"email","value":""},{"name":"last_name","value":"Braithwaite"},{"name":"do_not_call","value":"0"},{"name":"alt_address_country","value":""},{"name":"assigned_user_name","value":""},{"name":"primary_address_street_2","value":""},{"name":"primary_address_street_3","value":""},{"name":"alt_address_city","value":""},{"name":"date_entered","value":"2014-01-06 20:37:37"},{"name":"department","value":""},{"name":"reports_to_id","value":""},{"name":"primary_address_country","value":""},{"name":"created_by_name","value":"Tim Stephenson"},{"name":"email_opt_out","value":""},{"name":"accept_status_name","value":""},{"name":"id","value":"c9a4ae4a-05a0-273f-50ef-52cb1478b1a5"},{"name":"title","value":"Mr"},{"name":"alt_address_postalcode","value":""},{"name":"name","value":"John Braithwaite"},{"name":"birthdate","value":"birthdate"},{"name":"opportunity_role","value":""},{"name":"primary_address_state","value":""},{"name":"alt_address_street_3","value":""},{"name":"c_accept_status_fields","value":""},{"name":"email_addresses_non_primary","value":""},{"name":"date_modified","value":"2014-01-06 20:37:37"},{"name":"modified_by_name","value":"Tim Stephenson"},{"name":"phone_work","value":""},{"name":"list","value":"ist"},{"name":"email1","value":""},{"name":"opportunity_role_fields","value":""},{"name":"email2","value":""},{"name":"primary_address_street","value":""},{"name":"alt_address_street_2","value":""},{"name":"m_accept_status_fields","value":""},{"name":"phone_other","value":""},{"name":"email_and_name1","value":""},{"name":"salutation","value":""},{"name":"9a4ae4a-05a0-273f-50ef-52cb1478b1a5","value":"a4ae4a-05a0-273f-50ef-52cb1478b1a5"},{"name":"phone_mobile","value":""},{"name":"full_name","value":"John Braithwaite"}
 

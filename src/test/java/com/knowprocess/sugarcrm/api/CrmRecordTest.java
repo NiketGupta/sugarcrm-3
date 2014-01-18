@@ -1,5 +1,6 @@
 package com.knowprocess.sugarcrm.api;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -41,4 +42,11 @@ public class CrmRecordTest {
 		assertTrue(json.contains("\"last_name\":\"Sumner\""));
 	}
 
+	@Test
+	public void testFromJson() { 
+		String json = "{\"first_name\": \"Polly Jane\",\"last_name\":\"Harvey\"}";
+		CrmRecord record = CrmRecord.parseFromJson(json);
+		assertEquals("Polly Jane", record.getCustom("first_name"));
+		assertEquals("Harvey", record.getCustom("last_name"));
+	}
 }

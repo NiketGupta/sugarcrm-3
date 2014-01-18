@@ -48,6 +48,8 @@ import com.knowprocess.sugarcrm.api.SugarSession;
 
 public class SugarServiceV4Impl {
 
+	private static final String SVC_URL_FRAGMENT = "service/v4/rest.php";
+	private static final String NAME_VALUE_LIST_MARKER = "name_value_list";
 	private static final String NAME_MARKER = "\"name\":\"";
 	private static final String ID_MARKER = "\"id\":\"";
 	private static final String VALUE_MARKER = "\"value\":\"";
@@ -133,12 +135,20 @@ public class SugarServiceV4Impl {
 			wr.close();
 			byte[] b = new byte[1024];
 			is = (InputStream) connection.getContent();
+			//System.out.println("content length reported: "
+			//		+ connection.getContentLength());
 			while (is.read(b) != -1) {
 				response.append(new String(b).trim());
 			}
+			System.out.println("content length found: "
+					+ response.toString().length());
 			connection.disconnect();
 		} finally {
-			is.close();
+			try {
+				is.close();
+			} catch (Exception e) {
+				;
+			}
 		}
 		return response.toString();
 	}
@@ -165,28 +175,42 @@ public class SugarServiceV4Impl {
 	}
 
 	public CrmRecord getEntry(CrmSession session, String moduleName,
-			String contactId) throws IOException {
+			String contactId, String selectFields) throws IOException {
 		URL url = new URL(getServiceUrl(session.getSugarUrl()));
 		String entry = doPost(url,
-				getGetEntryPayload(session, moduleName, contactId, ""));
+				getGetEntryPayload(session, moduleName, contactId, selectFields));
 		return parseRecordFromJson(entry);
 	}
 
 	protected CrmRecord parseRecordFromJson(String entry) {
+		System.out.println("entry: " + entry);
 		CrmRecord record = new CrmRecord();
+		if (entry.contains(NAME_VALUE_LIST_MARKER)) {
+			int lStart = entry.indexOf(NAME_VALUE_LIST_MARKER);
+			entry = entry.substring(lStart + NAME_VALUE_LIST_MARKER.length()
+					+ 2);
+		}
+		System.out.println("entry: " + entry);
 		String[] nameValues = entry.split("\\{");
 		for (String nameValue : nameValues) {
+			System.out.println("parsing value from: " + nameValue);
 			if (nameValue != null && !nameValue.equals("null")
 					&& nameValue.length() > 0) {
 				int nStart = nameValue.indexOf(NAME_MARKER)
 						+ NAME_MARKER.length();
 				int vStart = nameValue.indexOf(VALUE_MARKER)
 						+ VALUE_MARKER.length();
+				try {
 				record.setCustom(
 						nameValue.substring(nStart,
 								nameValue.indexOf("\"", nStart)),
 						nameValue.substring(vStart,
 								nameValue.indexOf("\"", vStart)));
+				} catch (StringIndexOutOfBoundsException e) {
+					// object rather than simple child
+					// or could also be response is truncated which I have seen
+					// at 5079 chars (though sometimes over 6000)
+				}
 			}
 		}
 		return record;
@@ -226,9 +250,9 @@ public class SugarServiceV4Impl {
 
 	protected String getServiceUrl(String sugarUrl) {
 		if (sugarUrl.endsWith("/")) {
-			return sugarUrl + "service/v4/rest.php";
+			return sugarUrl + SVC_URL_FRAGMENT;
 		} else {
-			return sugarUrl + "/" + "service/v4/rest.php";
+			return sugarUrl + "/" + SVC_URL_FRAGMENT;
 		}
 	}
 
@@ -299,22 +323,23 @@ public class SugarServiceV4Impl {
 	}
 
 	public List<CrmRecord> getEntryList(CrmSession session, String moduleName,
-			CrmRecord query, int offset, int maxResults) throws IOException {
+			CrmRecord query, String orderByClause, int offset, int maxResults)
+			throws IOException {
 		URL url = new URL(getServiceUrl(session.getSugarUrl()));
 		String response = doPost(
 				url,
 				getGetEntryListPayload(session, moduleName,
-						query.getWhereClause(moduleName.toLowerCase()), offset,
-						maxResults));
+						query.getWhereClause(moduleName.toLowerCase()),
+						orderByClause, offset, maxResults));
 		return parseRecordsFromJson(response);
 	}
 
 	protected String getGetEntryListPayload(CrmSession session, String module,
-			String whereClause, int offset, int maxResults) {
+			String whereClause, String orderByClause, int offset, int maxResults) {
 		String query = queries.getProperty("get_entry_list");
 		return String.format(query, session.getSessionId(), module,
-				whereClause, "",
-				offset, maxResults);
+				whereClause, orderByClause, /* select fields */"", offset,
+				maxResults);
 	}
 
 	public String toJson(List<CrmRecord> list) {
