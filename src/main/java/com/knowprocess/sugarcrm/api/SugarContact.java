@@ -41,8 +41,7 @@ public class SugarContact extends CrmPerson implements Serializable {
 	}
 
 	public SugarContact(CrmRecord crmRecord) {
-		this();
-		this.properties = crmRecord.getProperties();
+		super(crmRecord);
 	}
 
 	public String getModifiedByName() {

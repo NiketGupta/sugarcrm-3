@@ -43,6 +43,8 @@ public class SugarServiceTest {
 
 	private CrmPerson contact;
 
+	private SugarLead lead;
+
 	@BeforeClass
 	public static void setUpClass() {
 		String usr = System.getProperty("sugar.username");
@@ -51,6 +53,12 @@ public class SugarServiceTest {
 		session = new SugarSession(usr == null ? "admin" : usr,
 				pwd == null ? "sugar" : pwd,
 				url == null ? "http://localhost/sugarcrm" : url);
+		// session = new SugarSession(usr == null ? "admin" : usr,
+		// pwd == null ? "gfjusmcnniqj" : pwd,
+		// url == null ? "http://www.trakeocorp.com" : url);
+		// session = new SugarSession(usr == null ? "TimS" : usr,
+		// pwd == null ? "RnFh31BJ%f#" : pwd,
+		// url == null ? "http://sugar.syncapt.com" : url);
 		svc = new SugarService();
 	}
 
@@ -157,6 +165,7 @@ public class SugarServiceTest {
 			// queryObject.setLastName("Braithwaite");
 			List<CrmRecord> results = svc.searchContacts(session, queryObject,
 					0, 10);
+
 			assertTrue(results.size() >= 1);
 
 			for (CrmRecord crmRecord : results) {
@@ -188,15 +197,102 @@ public class SugarServiceTest {
 		try {
 			svc.login(session);
 
-			SugarLead lead = new SugarLead();
+			lead = new SugarLead();
 			lead.setFirstName("Tim");
 			lead.setLastName("Stephenson");
 			lead.setTitle("Mr");
 			svc.createLead(session, lead);
 			System.out.println("lead:" + lead.getNameValueListAsJson());
 			assertNotNull(lead.getId());
+
+			// Check can find contact by newly created id
+			SugarLead queryObject = new SugarLead();
+			queryObject.setId(lead.getId());
+			// List<SugarLead> results = svc.searchLeads(session, queryObject,
+			// 0, 10);
+			// assertTrue(results.size() == 1);
+			// assertLeads(lead, new SugarLead(results.get(0)));
+
+			// Search on broader range of criteria
+			// queryObject = new SugarLead();
+			// queryObject.setFirstName(lead.getFirstName());
+			// results = svc.searchLeads(session, queryObject, 0, 10);
+			// assertTrue(results.size() == 1);
+			// assertLeads(lead, new SugarLead(results.get(0)));
+
+			// add an email to this lead
+			// ArchivedEmail email = new ArchivedEmail(session.getUsername(),
+			// "fred@example.com", "Hello Fred!",
+			// "It's been ages, we really need to get together for a round of golf. Call me!");
+			// CrmRecord archivedEmail = svc.archiveLeadEmail(session,
+			// lead.getId(), email);
+			// assertNotNull(archivedEmail.getId());
+			// System.out.println("archived email: " + archivedEmail.getId());
+
+			CrmRecord note = new CrmRecord();
+			note.setCustom("name", "Hello Fred!");
+			note.setCustom("description",
+					"It's been ages, we really need to get together for a round of golf. Call me!");
+
+			CrmRecord noteCreated = svc.addNoteToLead(session, lead.getId(),
+					note);
+			assertEquals(note.getCustom("name"), noteCreated.getCustom("name"));
+			assertEquals(note.getCustom("description"),
+					noteCreated.getCustom("description"));
+
+			CrmRecord query = new CrmRecord();
+			query.setId(noteCreated.getId());
+			List<SugarNote> notes = svc.searchNotes(session, query, 0, 1);
+			System.out.println(String.format("Found %1$s notes", notes.size()));
+			assertTrue(notes.size() >= 1);
+			System.out.println(String.format("Note %1$s: %2$s", notes.get(0)
+					.getId(), notes.get(0).toString()));
+			assertEquals(noteCreated.getId(), notes.get(0).getId());
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
 		} catch (IllegalStateException e) {
 			Assume.assumeTrue(e.getMessage(), true);
+		}
+	}
+
+	private void assertLeads(SugarLead expected, SugarLead crmRecord) {
+		System.out.println("returned: " + crmRecord.toJson());
+		// This is what we get back
+		// {"name":"opportunity_role_id","value":""},{"name":"primary_address_city","value":""},{"name":"assigned_user_id","value":""},{"name":"sync_contact","value":""},{"name":"primary_address_postalcode","value":""},{"name":"first_name","value":"John"},{"name":"phone_fax","value":""},{"name":"assistant","value":""},{"name":"invalid_email","value":""},{"name":"description","value":""},{"name":"ed_user_name","value":"d_user_name"},{"name":"accept_status_id","value":""},{"name":"created_by","value":"1"},{"name":"assistant_phone","value":""},{"name":"account_id","value":"1fc672a4-3d13-2b94-d94b-52cb1490d2e3"},{"name":"alt_address_state","value":""},{"name":"campaign_name","value":""},{"name":"modified_user_id","value":"1"},{"name":"deleted","value":"0"},{"name":"campaign_id","value":""},{"name":"report_to_name","value":""},{"name":"account_name","value":"Ergo Digital"},{"name":"phone_home","value":""},{"name":"alt_address_street","value":""},{"name":"lead_source","value":""},{"name":"email","value":""},{"name":"last_name","value":"Braithwaite"},{"name":"do_not_call","value":"0"},{"name":"alt_address_country","value":""},{"name":"assigned_user_name","value":""},{"name":"primary_address_street_2","value":""},{"name":"primary_address_street_3","value":""},{"name":"alt_address_city","value":""},{"name":"date_entered","value":"2014-01-06 20:37:37"},{"name":"department","value":""},{"name":"reports_to_id","value":""},{"name":"primary_address_country","value":""},{"name":"created_by_name","value":"Tim Stephenson"},{"name":"email_opt_out","value":""},{"name":"accept_status_name","value":""},{"name":"id","value":"c9a4ae4a-05a0-273f-50ef-52cb1478b1a5"},{"name":"title","value":"Mr"},{"name":"alt_address_postalcode","value":""},{"name":"name","value":"John Braithwaite"},{"name":"birthdate","value":"birthdate"},{"name":"opportunity_role","value":""},{"name":"primary_address_state","value":""},{"name":"alt_address_street_3","value":""},{"name":"c_accept_status_fields","value":""},{"name":"email_addresses_non_primary","value":""},{"name":"date_modified","value":"2014-01-06 20:37:37"},{"name":"modified_by_name","value":"Tim Stephenson"},{"name":"phone_work","value":""},{"name":"list","value":"ist"},{"name":"email1","value":""},{"name":"opportunity_role_fields","value":""},{"name":"email2","value":""},{"name":"primary_address_street","value":""},{"name":"alt_address_street_2","value":""},{"name":"m_accept_status_fields","value":""},{"name":"phone_other","value":""},{"name":"email_and_name1","value":""},{"name":"salutation","value":""},{"name":"9a4ae4a-05a0-273f-50ef-52cb1478b1a5","value":"a4ae4a-05a0-273f-50ef-52cb1478b1a5"},{"name":"phone_mobile","value":""},{"name":"full_name","value":"John Braithwaite"}
+
+		assertNotNull(crmRecord);
+		assertEquals("Tim", crmRecord.getCustom("first_name"));
+		assertEquals(expected.getFirstName(), crmRecord.getFirstName());
+		assertEquals("Stephenson", crmRecord.getCustom("last_name"));
+		assertEquals(expected.getLastName(), crmRecord.getLastName());
+		assertEquals("Mr", crmRecord.getCustom("title"));
+		assertEquals(expected.getTitle(), crmRecord.getTitle());
+	}
+
+	@Test
+	@Ignore
+	// Not yet implemented
+	public void searchLeadsByNameTest() {
+		try {
+			svc.login(session);
+
+			// Check can find contact by its properties
+			SugarLead queryObject = new SugarLead();
+			queryObject.setFirstName("Tim");
+			// queryObject.setLastName("Stephenson");
+			List<SugarLead> results = svc.searchLeads(session, queryObject, 0,
+					10);
+
+			assertTrue(results.size() >= 1);
+
+			for (SugarLead crmRecord : results) {
+				System.out.println("Checking: " + crmRecord.toJson());
+				assertLeads(lead, crmRecord);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 }

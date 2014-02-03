@@ -17,6 +17,7 @@
  */
 package com.knowprocess.crm;
 
+import java.io.Serializable;
 import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,9 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
@@ -41,7 +40,9 @@ import com.knowprocess.sugarcrm.api.SugarService;
  * @author timstephenson
  * 
  */
-public class CrmRecord {
+public class CrmRecord implements Serializable {
+	private static final long serialVersionUID = 1397645817430467867L;
+
 	public static final DateFormat iso = new SimpleDateFormat(
 			"yyyy-MM-dd'T'hh:mm:ss");
 
@@ -51,6 +52,12 @@ public class CrmRecord {
 
 	public CrmRecord() {
 		super();
+	}
+
+	public CrmRecord(CrmRecord crmRecord) {
+		this();
+		setId(crmRecord.getId());
+		this.properties = crmRecord.getProperties();
 	}
 
 	public String getId() {
@@ -70,8 +77,14 @@ public class CrmRecord {
 	}
 
 	public void setCustom(String name, Object value) {
-		//System.out.println("Setting '" + name + "' to '" + value + "'");
-		properties.put(name, value);
+		// System.out.println("Setting '" + name + "' to '" + value + "'");
+		if ("id".equals(name)) {
+			System.out.println("*****************" + value);
+			setId((String) value);
+			System.out.println("&&&&&&&&&" + getId());
+		} else {
+			properties.put(name, value);
+		}
 	}
 
 	public String getNameValueListAsJson() {
@@ -123,6 +136,11 @@ public class CrmRecord {
 		return sb.toString();
 	}
 
+	@Override
+	public String toString() {
+		return "CrmRecord [id=" + id + ", properties=" + properties + "]";
+	}
+
 	public String toJson() {
 		JsonObjectBuilder bldr = Json.createObjectBuilder();
 		for (Entry<String, Object> entry : properties.entrySet()) {
@@ -152,10 +170,23 @@ public class CrmRecord {
 						json.substring(start + 1, json.indexOf('"', start + 1)));
 			}
 		}
-		JsonReader reader = Json.createReader(new StringReader(json));
-		JsonObject obj = reader.readObject();
-		//System.out.println("obj" + obj);
+		// JsonReader reader = Json.createReader(new StringReader(json));
+		// JsonObject obj = reader.readObject();
+		// System.out.println("obj" + obj);
 
 		return record;
+	}
+
+	public String getSelectFields() {
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Entry<String, Object>> it = properties.entrySet()
+				.iterator(); it.hasNext();) {
+			Entry<String, Object> e = it.next();
+			sb.append("\"").append(e.getKey()).append("\"");
+			if (it.hasNext()) {
+				sb.append(",");
+			}
+		}
+		return sb.toString();
 	}
 }

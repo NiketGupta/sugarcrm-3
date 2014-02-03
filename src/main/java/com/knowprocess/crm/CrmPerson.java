@@ -2,8 +2,14 @@ package com.knowprocess.crm;
 
 public class CrmPerson extends CrmRecord {
 
+	private static final long serialVersionUID = -8703718022333108311L;
+
 	public CrmPerson() {
 		super();
+	}
+
+	public CrmPerson(CrmRecord crmRecord) {
+		super(crmRecord);
 	}
 
 	public String getFirstName() {

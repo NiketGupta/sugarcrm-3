@@ -20,6 +20,11 @@ package com.knowprocess.crm;
 import java.io.IOException;
 import java.util.List;
 
+import com.knowprocess.sugarcrm.api.ArchivedEmail;
+import com.knowprocess.sugarcrm.api.SugarLead;
+import com.knowprocess.sugarcrm.api.SugarNote;
+import com.knowprocess.sugarcrm.api.SugarSession;
+
 public interface CrmService {
 
 	CrmSession login(CrmSession session);
@@ -39,6 +44,17 @@ public interface CrmService {
 	List<CrmRecord> searchContacts(CrmSession session, CrmRecord query,
 			int offset, int maxResults) throws IOException;
 
+	List<SugarLead> searchLeads(CrmSession session, CrmRecord query,
+			int offset, int maxResults) throws IOException;
+
+	List<SugarNote> searchNotes(SugarSession session, CrmRecord query,
+			int offset, int maxResults) throws IOException;
+
 	String toJson(List<CrmRecord> list);
+
+	//CrmRecord archiveLeadEmail(CrmSession session, String leadId,
+	//		ArchivedEmail email) throws IOException;
+
+	CrmRecord addNoteToLead(CrmSession session, String leadId, CrmRecord note);
 
 }

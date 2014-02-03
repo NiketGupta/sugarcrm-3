@@ -98,7 +98,7 @@ public class SugarService implements CrmService {
 		return setEntry(session, contact, "Contacts");
 	}
 
-	private CrmRecord setEntry(CrmSession session, CrmRecord contact,
+	protected CrmRecord setEntry(CrmSession session, CrmRecord contact,
 			String moduleName) {
 		try {
 			contact.setId(impl.setEntry(session, moduleName,
@@ -123,16 +123,22 @@ public class SugarService implements CrmService {
 		createContact(session, contact);
 		createAccount(session, acct);
 
+		createRelationship(session, "Accounts", acct.getId(), "contacts",
+				contact.getId());
+		return contact;
+	}
+
+	private void createRelationship(CrmSession session, String moduleA,
+			String idA, String moduleB, String idB) {
 		try {
-			String response = impl.setRelationship(session, "Accounts",
-					acct.getId(), "contacts", contact.getId());
+			String response = impl.setRelationship(session, moduleA, idA,
+					moduleB, idB);
 			System.out.println("Response: " + response);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new SugarException(e.getMessage(), e);
 		}
-		return contact;
 	}
 
 	/**
@@ -155,6 +161,25 @@ public class SugarService implements CrmService {
 		return new SugarContact(impl.getEntry(session, "Contacts", contactId, ""));
 	}
 
+	protected List<CrmRecord> search(CrmSession session, String moduleName,
+			CrmRecord query, String orderBy, int offset, int maxResults)
+			throws IOException {
+		// Note that calling getEntryList with id='x' seems not to return work,
+		// hence this workaround
+
+		// Note 2: No success getting any result from search_by_module
+		List<CrmRecord> list = null;
+		if (query.getId() == null) {
+			list = impl.getEntryList(session, moduleName, query, orderBy,
+					offset, maxResults);
+		} else {
+			list = new ArrayList<CrmRecord>();
+			list.add(impl.getEntry(session, moduleName, query.getId(), ""));
+		}
+
+		return list;
+	}
+
 	/**
 	 * 
 	 * @param offset
@@ -165,21 +190,47 @@ public class SugarService implements CrmService {
 	 */
 	public List<CrmRecord> searchContacts(CrmSession session, CrmRecord query,
 			int offset, int maxResults) throws IOException {
-		// Note that calling getEntryList with id='x' seems not to return work,
-		// hence this workaround
-
-		// Note 2: No success getting any result from search_by_module
-		List<CrmRecord> list = null;
-		if (query.getId() == null) {
-			list = impl.getEntryList(session, "Contacts", query, 
-					/* order by */" contacts.last_name ", offset, maxResults);
-		} else {
-			list = new ArrayList<CrmRecord>();
-			list.add(impl.getEntry(session, "Contacts", query.getId(), ""));
-		}
+		List<CrmRecord> list = search(session, "Contacts", query,
+				" contacts.last_name ", offset, maxResults);
 		List<CrmRecord> typedList = new ArrayList<CrmRecord>();
 		for (CrmRecord crmRecord : list) {
 			typedList.add(new SugarContact(crmRecord));
+		}
+		return typedList;
+	}
+
+	/**
+	 * @param offset
+	 * @param maxResults
+	 * @throws IOException
+	 * @see com.knowprocess.crm.api.CrmService#searchLeads(com.knowprocess.crm
+	 *      .api.CrmSession, com.knowprocess.crm .api.CrmRecord, int, int)
+	 */
+	public List<SugarLead> searchLeads(SugarSession session, CrmRecord query,
+			int offset, int maxResults) throws IOException {
+		List<CrmRecord> list = search(session, "Leads", query, " ", offset,
+				maxResults);
+		List<SugarLead> typedList = new ArrayList<SugarLead>();
+		for (CrmRecord crmRecord : list) {
+			typedList.add(new SugarLead(crmRecord));
+		}
+		return typedList;
+	}
+
+	/**
+	 * @param offset
+	 * @param maxResults
+	 * @throws IOException
+	 * @see com.knowprocess.crm.api.CrmService#searchLeads(com.knowprocess.crm
+	 *      .api.CrmSession, com.knowprocess.crm .api.CrmRecord, int, int)
+	 */
+	public List<SugarNote> searchNotes(SugarSession session, CrmRecord query,
+			int offset, int maxResults) throws IOException {
+		List<CrmRecord> list = search(session, "Notes", query, " ", offset,
+				maxResults);
+		List<SugarNote> typedList = new ArrayList<SugarNote>();
+		for (CrmRecord crmRecord : list) {
+			typedList.add(new SugarNote(crmRecord));
 		}
 		return typedList;
 	}
@@ -208,4 +259,31 @@ public class SugarService implements CrmService {
 	public String toJson(List<CrmRecord> list) {
 		return impl.toJson(list);
 	}
+
+	public List<SugarLead> searchLeads(CrmSession session, CrmRecord query,
+			int offset, int maxResults) throws IOException {
+		System.out.println("searchLeads called, not yet implemented");
+		throw new RuntimeException("Not yet implemented");
+	}
+
+	public CrmRecord archiveLeadEmail(CrmSession session, String leadId,
+			ArchivedEmail email) throws IOException {
+		// CrmRecord entry = setEntry(session, email, "Emails");
+		// createRelationship(session, "Leads", leadId, "Emails",
+		// entry.getId());
+
+		impl.archiveEmail(session, email);
+
+		return email;
+	}
+
+
+	public CrmRecord addNoteToLead(CrmSession session, String leadId,
+			CrmRecord note) {
+		CrmRecord entry = setEntry(session, note, "Notes");
+		this.createRelationship(session, "Leads", leadId, "notes",
+				entry.getId());
+		return entry;
+	}
+
 }

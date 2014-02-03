@@ -29,7 +29,7 @@ public class SugarAccount extends CrmRecord implements Serializable {
 	private static final long serialVersionUID = 190044867985297262L;
 
 	public SugarAccount() {
-		;
+		super();
 	}
 
 	public String getName() {

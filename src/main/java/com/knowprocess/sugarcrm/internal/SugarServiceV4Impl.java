@@ -41,6 +41,7 @@ import javax.json.JsonValue;
 
 import com.knowprocess.crm.CrmRecord;
 import com.knowprocess.crm.CrmSession;
+import com.knowprocess.sugarcrm.api.ArchivedEmail;
 import com.knowprocess.sugarcrm.api.SugarAuthenticationException;
 import com.knowprocess.sugarcrm.api.SugarException;
 import com.knowprocess.sugarcrm.api.SugarService;
@@ -135,8 +136,8 @@ public class SugarServiceV4Impl {
 			wr.close();
 			byte[] b = new byte[1024];
 			is = (InputStream) connection.getContent();
-			//System.out.println("content length reported: "
-			//		+ connection.getContentLength());
+			// System.out.println("content length reported: "
+			// + connection.getContentLength());
 			while (is.read(b) != -1) {
 				response.append(new String(b).trim());
 			}
@@ -177,7 +178,8 @@ public class SugarServiceV4Impl {
 	public CrmRecord getEntry(CrmSession session, String moduleName,
 			String contactId, String selectFields) throws IOException {
 		URL url = new URL(getServiceUrl(session.getSugarUrl()));
-		String entry = doPost(url,
+		String entry = doPost(
+				url,
 				getGetEntryPayload(session, moduleName, contactId, selectFields));
 		return parseRecordFromJson(entry);
 	}
@@ -201,11 +203,11 @@ public class SugarServiceV4Impl {
 				int vStart = nameValue.indexOf(VALUE_MARKER)
 						+ VALUE_MARKER.length();
 				try {
-				record.setCustom(
-						nameValue.substring(nStart,
-								nameValue.indexOf("\"", nStart)),
-						nameValue.substring(vStart,
-								nameValue.indexOf("\"", vStart)));
+					record.setCustom(
+							nameValue.substring(nStart,
+									nameValue.indexOf("\"", nStart)),
+							nameValue.substring(vStart,
+									nameValue.indexOf("\"", vStart)));
 				} catch (StringIndexOutOfBoundsException e) {
 					// object rather than simple child
 					// or could also be response is truncated which I have seen
@@ -330,16 +332,17 @@ public class SugarServiceV4Impl {
 				url,
 				getGetEntryListPayload(session, moduleName,
 						query.getWhereClause(moduleName.toLowerCase()),
-						orderByClause, offset, maxResults));
+						orderByClause, query.getSelectFields(), offset,
+						maxResults));
 		return parseRecordsFromJson(response);
 	}
 
 	protected String getGetEntryListPayload(CrmSession session, String module,
-			String whereClause, String orderByClause, int offset, int maxResults) {
+			String whereClause, String orderByClause, String selectFields,
+			int offset, int maxResults) {
 		String query = queries.getProperty("get_entry_list");
 		return String.format(query, session.getSessionId(), module,
-				whereClause, orderByClause, /* select fields */"", offset,
-				maxResults);
+				whereClause, orderByClause, selectFields, offset, maxResults);
 	}
 
 	public String toJson(List<CrmRecord> list) {
@@ -348,5 +351,25 @@ public class SugarServiceV4Impl {
 			sb.append(crmRecord.toJson());
 		}
 		return sb.append("]").toString();
+	}
+
+	public CrmRecord archiveEmail(CrmSession session, ArchivedEmail email)
+			throws IOException {
+		URL url = new URL(getServiceUrl(session.getSugarUrl()));
+		String response = doPost(url, getArchiveEmailPayload(session, email));
+		System.out.println("response: " + response);
+		String id = parseId(response);
+		email.setId(id);
+		return email;
+	}
+
+	protected String getArchiveEmailPayload(CrmSession session,
+			ArchivedEmail email) {
+		String query = queries.getProperty("snip_import_emails");
+		String cmd = String.format(query, session.getSessionId(),
+				email.getSubject(), email.getFrom(), email.getBody(),
+				"<html></html>", email.getTo(), "", "", "2014-01-31 14:30:19");
+		System.out.println("cmd: " + cmd);
+		return cmd;
 	}
 }

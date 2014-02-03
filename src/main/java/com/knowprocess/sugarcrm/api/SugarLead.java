@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.knowprocess.crm.CrmPerson;
+import com.knowprocess.crm.CrmRecord;
 
 public class SugarLead extends CrmPerson implements Serializable {
 
@@ -28,6 +29,15 @@ public class SugarLead extends CrmPerson implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -7522929479604477420L;
+
+	public SugarLead() {
+		super();
+	}
+
+	public SugarLead(CrmRecord crmRecord) {
+		this();
+		this.properties = crmRecord.getProperties();
+	}
 
 	public Date getDateEntered() {
 		return (Date) properties.get("date_entered");
