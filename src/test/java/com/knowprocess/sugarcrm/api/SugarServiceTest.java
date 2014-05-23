@@ -111,7 +111,7 @@ public class SugarServiceTest {
 			assertNotNull(contact.getId());
 		} catch (IllegalStateException e) {
 			Assume.assumeTrue(e.getMessage(), true);
-		}
+        }
 	}
 
 	@Test
@@ -128,8 +128,13 @@ public class SugarServiceTest {
 			assertNotNull(contact.getId());
 
 			// Check can find contact by its id
-			CrmRecord contact2 = svc.getContact(session, contact.getId());
-			assertContacts(contact, new SugarContact(contact2));
+            SugarContact contact2 = new SugarContact(svc.getContact(session,
+                    contact.getId()));
+            assertContacts(contact, contact2);
+            System.out.println(contact2.getCustom("account_id"));
+            assertNotNull(contact2.getCustom("account_id"));
+            assertEquals(contact2.getCustom("account_id"),
+                    contact2.getAccountId());
 
 			// Check can find contact by newly created id
 			SugarContact queryObject = new SugarContact();
@@ -295,4 +300,25 @@ public class SugarServiceTest {
 			fail(e.getMessage());
 		}
 	}
+
+    @Test
+    public void getReferenceDataTest() {
+        try {
+            svc.login(session);
+
+            List<CrmRecord> results = svc.getReferenceData(session, "Contacts");
+
+            assertTrue(results.size() >= 1);
+
+            for (CrmRecord crmRecord : results) {
+                System.out.println("Checking: " + crmRecord.toJson());
+                // assertLeads(lead, crmRecord);
+            }
+        } catch (IllegalStateException e) {
+            Assume.assumeTrue(e.getMessage(), true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 }

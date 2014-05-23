@@ -33,7 +33,7 @@ import com.knowprocess.sugarcrm.internal.SugarServiceV4Impl;
 /**
  * Exposes a more semantically rich API wrapping the setX, getX API of Sugar.
  * 
- * @author timstephenson
+ * @author Tim Stephenson
  */
 public class SugarService implements CrmService {
 
@@ -158,8 +158,19 @@ public class SugarService implements CrmService {
 	 */
 	public CrmRecord getContact(CrmSession session, String contactId)
 			throws IOException {
-		return new SugarContact(impl.getEntry(session, "Contacts", contactId, ""));
+		SugarContact contact = new SugarContact(impl.getEntry(session, "Contacts", contactId, ""));
+        if (contact.getAccountId() != null) {
+            contact.setAccount(new SugarAccount(impl.getEntry(session,
+                    "Accounts", contact.getAccountId(), "")));
+        }
+        return contact;
 	}
+
+    public List<CrmRecord> getRelationships(CrmSession session,
+            String moduleName, String id, String linkedModule)
+            throws IOException {
+        return impl.getRelationships(session, moduleName, id, linkedModule);
+    }
 
 	protected List<CrmRecord> search(CrmSession session, String moduleName,
 			CrmRecord query, String orderBy, int offset, int maxResults)
@@ -190,11 +201,13 @@ public class SugarService implements CrmService {
 	 */
 	public List<CrmRecord> searchContacts(CrmSession session, CrmRecord query,
 			int offset, int maxResults) throws IOException {
-		List<CrmRecord> list = search(session, "Contacts", query,
+        String moduleName = "Contacts";
+        List<CrmRecord> list = search(session, moduleName, query,
 				" contacts.last_name ", offset, maxResults);
 		List<CrmRecord> typedList = new ArrayList<CrmRecord>();
 		for (CrmRecord crmRecord : list) {
-			typedList.add(new SugarContact(crmRecord));
+			SugarContact contact = new SugarContact(crmRecord);
+            typedList.add(contact);
 		}
 		return typedList;
 	}
@@ -285,5 +298,10 @@ public class SugarService implements CrmService {
 				entry.getId());
 		return entry;
 	}
+
+    public List<CrmRecord> getReferenceData(SugarSession session, String string) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

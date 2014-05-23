@@ -218,11 +218,12 @@ public class SugarServiceV4ImplTest {
 		try {
 			session.setSessionId(svc.login(session));
 			System.out.println("session id: " + session.getSessionId());
-			String payload = svc.getModuleFields(session, "industry");
+            String payload = svc.getModuleFields(session, "Accounts");
 			System.out.println("payload: " + payload);
 			// TODO assertions
 		} catch (IllegalStateException e) {
 			// Assume dev server not available
+            e.printStackTrace();
 			Assume.assumeTrue(e.getMessage(), true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -230,4 +231,21 @@ public class SugarServiceV4ImplTest {
 		}
 	}
 
+    @Test
+    public void testAvailableModules() {
+        try {
+            session.setSessionId(svc.login(session));
+            System.out.println("session id: " + session.getSessionId());
+            String payload = svc.getAvailableModules(session, null);
+            System.out.println("payload: " + payload);
+            // TODO assertions
+        } catch (IllegalStateException e) {
+            // Assume dev server not available
+            e.printStackTrace();
+            Assume.assumeTrue(e.getMessage(), true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getClass().getName() + ":" + e.getMessage());
+        }
+    }
 }

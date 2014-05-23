@@ -39,7 +39,12 @@ public class SugarLead extends CrmPerson implements Serializable {
 		this.properties = crmRecord.getProperties();
 	}
 
-	public Date getDateEntered() {
+    public SugarLead(String desc) {
+        this();
+        setDescription(desc);
+    }
+
+    public Date getDateEntered() {
 		return (Date) properties.get("date_entered");
 	}
 

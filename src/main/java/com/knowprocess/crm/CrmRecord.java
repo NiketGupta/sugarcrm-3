@@ -20,6 +20,7 @@ package com.knowprocess.crm;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,6 +50,9 @@ public class CrmRecord implements Serializable {
 	protected String id;
 
 	protected Map<String, Object> properties = new HashMap<String, Object>();
+
+    private DateFormat isoFormatter = new SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss");
 
 	public CrmRecord() {
 		super();
@@ -82,7 +86,23 @@ public class CrmRecord implements Serializable {
 			System.out.println("*****************" + value);
 			setId((String) value);
 			System.out.println("&&&&&&&&&" + getId());
-		} else {
+        } else if (("date_entered".equals(name) || "date_modified".equals(name))
+                && value instanceof String) {
+            // TODO need a smarter way to do this.
+            try {
+                properties.put(name, isoFormatter.parse((String) value));
+            } catch (ParseException e) {
+                System.err.println(e.getMessage());
+            }
+        } else if (value == null || "null".equals(value)) {
+            // skip
+        } else if (value instanceof String) {
+            try {
+                properties.put(name, Integer.valueOf((String) value));
+            } catch (NumberFormatException e) {
+                properties.put(name, value);
+            }
+        } else {
 			properties.put(name, value);
 		}
 	}

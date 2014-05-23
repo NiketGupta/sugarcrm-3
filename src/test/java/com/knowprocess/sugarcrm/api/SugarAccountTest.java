@@ -25,7 +25,7 @@ public class SugarAccountTest {
 			engine.eval(SCRIPT);
 			SugarAccount acct = (SugarAccount) engine.get("acct");
 			System.out.println("acct parsed: " + acct);
-			assertEquals("12345678", acct.getCustom("companyNumber"));
+            assertEquals(12345678, acct.getCustom("companyNumber"));
 		} catch (ClassCastException e) {
 			e.printStackTrace();
 			fail(e.getMessage());

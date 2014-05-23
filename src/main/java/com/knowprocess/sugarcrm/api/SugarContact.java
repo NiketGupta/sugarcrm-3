@@ -116,4 +116,15 @@ public class SugarContact extends CrmPerson implements Serializable {
 		properties.put("do_not_call", Boolean.valueOf(doNotCall));
 	}
 
+    public String getAccountId() {
+        return (String) properties.get("account_id");
+    }
+
+    public void setAccount(SugarAccount acct) {
+        properties.put("account", acct);
+    }
+
+    public SugarAccount getAccount() {
+        return (SugarAccount) properties.get("account");
+    }
 }

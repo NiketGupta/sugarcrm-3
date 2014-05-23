@@ -32,7 +32,11 @@ public class SugarAccount extends CrmRecord implements Serializable {
 		super();
 	}
 
-	public String getName() {
+    public SugarAccount(CrmRecord record) {
+        super(record);
+    }
+
+    public String getName() {
 		return (String) properties.get("name");
 	}
 

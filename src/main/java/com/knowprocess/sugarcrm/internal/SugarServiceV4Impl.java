@@ -184,6 +184,17 @@ public class SugarServiceV4Impl {
 		return parseRecordFromJson(entry);
 	}
 
+    public List<CrmRecord> getRelationships(CrmSession session,
+            String moduleName, String id, String linkedModule)
+            throws IOException {
+        URL url = new URL(getServiceUrl(session.getSugarUrl()));
+        String entry = doPost(
+                url,
+                getGetRelationshipsPayload(session, moduleName, id,
+                        linkedModule));
+        return parseRecordsFromJson(entry);
+    }
+
 	protected CrmRecord parseRecordFromJson(String entry) {
 		System.out.println("entry: " + entry);
 		CrmRecord record = new CrmRecord();
@@ -273,7 +284,15 @@ public class SugarServiceV4Impl {
 				nameValueList);
 	}
 
-	protected String getSetRelationshipPayload(CrmSession session,
+    protected String getGetRelationshipsPayload(CrmSession session,
+            String module, String entryId, String linkedModule)
+            throws UnsupportedEncodingException {
+        String query = queries.getProperty("get_relationships");
+        return String.format(query, session.getSessionId(), module, entryId,
+                linkedModule);
+    }
+
+    protected String getSetRelationshipPayload(CrmSession session,
 			String moduleName, String parentId, String linkField, String linkId) {
 		String query = queries.getProperty("set_relationship");
 		return String.format(query, session.getSessionId(), moduleName,
@@ -372,4 +391,21 @@ public class SugarServiceV4Impl {
 		System.out.println("cmd: " + cmd);
 		return cmd;
 	}
+
+    public String getAvailableModules(SugarSession session, String filter)
+            throws IOException {
+        if (filter == null
+                || (!filter.equals("all") && !filter.equals("default") && !filter
+                        .equals("mobile"))) {
+            filter = "default";
+        }
+        return doPost(new URL(getServiceUrl(session.getSugarUrl())),
+                getAvailableModulesPayload(session, filter));
+    }
+
+    protected String getAvailableModulesPayload(CrmSession session,
+            String filter) {
+        String query = queries.getProperty("get_available_modules");
+        return String.format(query, session.getSessionId(), filter);
+    }
 }
