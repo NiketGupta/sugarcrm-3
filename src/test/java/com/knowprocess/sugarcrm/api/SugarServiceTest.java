@@ -37,7 +37,15 @@ import com.knowprocess.crm.CrmService;
 
 public class SugarServiceTest {
 
-	private static SugarSession session;
+    private static final int D_EBITDA = 54800;
+
+    private static final String D_TITLE = "Managing Director";
+
+    private static final String D_LAST_NAME = "Braithwaite";
+
+    private static final String D_FIRST_NAME = "John TEST";
+
+    private static SugarSession session;
 
 	private static CrmService svc;
 
@@ -65,9 +73,9 @@ public class SugarServiceTest {
 	@Before
 	public void setUp() {
 		contact = new SugarContact();
-		contact.setFirstName("John");
-		contact.setLastName("Braithwaite");
-		contact.setTitle("Mr");
+        contact.setFirstName(D_FIRST_NAME);
+        contact.setLastName(D_LAST_NAME);
+        contact.setTitle(D_TITLE);
 	}
 
 	@Test
@@ -115,12 +123,12 @@ public class SugarServiceTest {
 	}
 
 	@Test
-	public void testCreateContactAndLinkedAccount() {
+    public void testCreateContactAndLinkedAccountThenUpdate() {
 		try {
 			svc.login(session);
 
 			SugarAccount acct = new SugarAccount();
-			acct.setName("Ergo Digital");
+            acct.setName("Ergo Digital TEST");
 
 			svc.createAccountWithPrimeContact(session, contact, acct);
 
@@ -142,8 +150,30 @@ public class SugarServiceTest {
 			List<CrmRecord> results = svc.searchContacts(session, queryObject,
 					0, 10);
 			assertTrue(results.size() >= 1);
-			assertContacts(contact, new SugarContact(results.get(0)));
-		} catch (IllegalStateException e) {
+            SugarContact newlyCreatedContact = new SugarContact(results.get(0));
+            assertContacts(contact, newlyCreatedContact);
+
+            // Now update ....
+            contact.setFirstName(contact.getFirstName()
+                    + " UPDATED");
+            acct.setCustom("val_quote_low_c", D_EBITDA * 6);
+            acct.setCustom("val_quote_mid_c", D_EBITDA * 10);
+            acct.setCustom("val_quote_high_c", D_EBITDA * 14);
+            newlyCreatedContact.setFirstName(contact.getFirstName());
+            CrmRecord updatedContact = svc.updateAccountWithPrimeContact(
+                    session, newlyCreatedContact, acct);
+            assertEquals(newlyCreatedContact, updatedContact);
+            assertContacts(contact, newlyCreatedContact);
+            
+            // check can fetch associated account
+            CrmRecord updatedAccount = svc.getAccount(session, acct.getId());
+            assertEquals(acct.getCustom("val_quote_low_c"),
+                    updatedAccount.getCustom("val_quote_low_c"));
+            assertEquals(acct.getCustom("val_quote_med_c"),
+                    updatedAccount.getCustom("val_quote_med_c"));
+            assertEquals(acct.getCustom("val_quote_high_c"),
+                    updatedAccount.getCustom("val_quote_high_c"));
+        } catch (IllegalStateException e) {
 			System.out.println(e.getMessage());
 			Assume.assumeTrue(e.getMessage(), true);
 		} catch (IOException e) {
@@ -189,11 +219,9 @@ public class SugarServiceTest {
 		// {"name":"opportunity_role_id","value":""},{"name":"primary_address_city","value":""},{"name":"assigned_user_id","value":""},{"name":"sync_contact","value":""},{"name":"primary_address_postalcode","value":""},{"name":"first_name","value":"John"},{"name":"phone_fax","value":""},{"name":"assistant","value":""},{"name":"invalid_email","value":""},{"name":"description","value":""},{"name":"ed_user_name","value":"d_user_name"},{"name":"accept_status_id","value":""},{"name":"created_by","value":"1"},{"name":"assistant_phone","value":""},{"name":"account_id","value":"1fc672a4-3d13-2b94-d94b-52cb1490d2e3"},{"name":"alt_address_state","value":""},{"name":"campaign_name","value":""},{"name":"modified_user_id","value":"1"},{"name":"deleted","value":"0"},{"name":"campaign_id","value":""},{"name":"report_to_name","value":""},{"name":"account_name","value":"Ergo Digital"},{"name":"phone_home","value":""},{"name":"alt_address_street","value":""},{"name":"lead_source","value":""},{"name":"email","value":""},{"name":"last_name","value":"Braithwaite"},{"name":"do_not_call","value":"0"},{"name":"alt_address_country","value":""},{"name":"assigned_user_name","value":""},{"name":"primary_address_street_2","value":""},{"name":"primary_address_street_3","value":""},{"name":"alt_address_city","value":""},{"name":"date_entered","value":"2014-01-06 20:37:37"},{"name":"department","value":""},{"name":"reports_to_id","value":""},{"name":"primary_address_country","value":""},{"name":"created_by_name","value":"Tim Stephenson"},{"name":"email_opt_out","value":""},{"name":"accept_status_name","value":""},{"name":"id","value":"c9a4ae4a-05a0-273f-50ef-52cb1478b1a5"},{"name":"title","value":"Mr"},{"name":"alt_address_postalcode","value":""},{"name":"name","value":"John Braithwaite"},{"name":"birthdate","value":"birthdate"},{"name":"opportunity_role","value":""},{"name":"primary_address_state","value":""},{"name":"alt_address_street_3","value":""},{"name":"c_accept_status_fields","value":""},{"name":"email_addresses_non_primary","value":""},{"name":"date_modified","value":"2014-01-06 20:37:37"},{"name":"modified_by_name","value":"Tim Stephenson"},{"name":"phone_work","value":""},{"name":"list","value":"ist"},{"name":"email1","value":""},{"name":"opportunity_role_fields","value":""},{"name":"email2","value":""},{"name":"primary_address_street","value":""},{"name":"alt_address_street_2","value":""},{"name":"m_accept_status_fields","value":""},{"name":"phone_other","value":""},{"name":"email_and_name1","value":""},{"name":"salutation","value":""},{"name":"9a4ae4a-05a0-273f-50ef-52cb1478b1a5","value":"a4ae4a-05a0-273f-50ef-52cb1478b1a5"},{"name":"phone_mobile","value":""},{"name":"full_name","value":"John Braithwaite"}
 
 		assertNotNull(crmRecord);
-		assertEquals("John", crmRecord.getCustom("first_name"));
+        assertEquals(expected.getId(), crmRecord.getId());
 		assertEquals(expected.getFirstName(), crmRecord.getFirstName());
-		assertEquals("Braithwaite", crmRecord.getCustom("last_name"));
 		assertEquals(expected.getLastName(), crmRecord.getLastName());
-		assertEquals("Mr", crmRecord.getCustom("title"));
 		assertEquals(expected.getTitle(), crmRecord.getTitle());
 	}
 
@@ -302,6 +330,7 @@ public class SugarServiceTest {
 	}
 
     @Test
+    @Ignore
     public void getReferenceDataTest() {
         try {
             svc.login(session);
@@ -315,6 +344,8 @@ public class SugarServiceTest {
                 // assertLeads(lead, crmRecord);
             }
         } catch (IllegalStateException e) {
+            System.err
+                    .println("No credentials to connect to Sugar, assume test ok");
             Assume.assumeTrue(e.getMessage(), true);
         } catch (Exception e) {
             e.printStackTrace();

@@ -41,9 +41,9 @@ public class SugarSession implements Serializable, CrmSession {
 
 	public SugarSession(String username, String password, String sugarUrl) {
 		this();
-		this.username = username;
-		this.password = password;
-		this.sugarUrl = sugarUrl;
+        setUsername(username);
+        setPassword(password);
+        setSugarUrl(sugarUrl);
 		if (!isValid()) {
 			throw new IllegalArgumentException(
 					"Please check Username, Password and URL supplied.");
@@ -88,7 +88,11 @@ public class SugarSession implements Serializable, CrmSession {
 	}
 
 	public void setSugarUrl(String sugarUrl) {
-		this.sugarUrl = sugarUrl;
+        if (!sugarUrl.endsWith("/")) {
+            this.sugarUrl = sugarUrl + '/';
+        } else {
+            this.sugarUrl = sugarUrl;
+        }
 	}
 
 	/**

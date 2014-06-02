@@ -72,7 +72,8 @@ public class SugarServiceV4ImplTest {
 
 	@Test
 	public void testGetServiceUrl() {
-		assertEquals(session.getSugarUrl() + "service/v4/rest.php",
+        assertEquals(session.getSugarUrl()
+                + SugarServiceV4Impl.SVC_URL_FRAGMENT,
 				svc.getServiceUrl(session.getSugarUrl()));
 	}
 
@@ -83,10 +84,11 @@ public class SugarServiceV4ImplTest {
 			System.out.println("payload: " + payload);
 			assertEquals(
 					"method=login&input_type=json&response_type=json&rest_data={\""
-							+ "user_auth\":{\"user_name\":\"admin\","
-							+ "\"version\":\".01\","
-							+ "\"username\":\"admin\","
-							+ "\"password\":\""
+                            + "user_auth\":{\"user_name\":\""
+                            + session.getUsername()
+                            + "\",\"version\":\".01\",\"username\":\""
+                            + session.getUsername()
+                            + "\",\"password\":\""
 							+ svc.hash(session.getPassword())
 							+ "\"},\"application_name\":\"com.knowprocess.sugarcrm.api.SugarService\"}",
 					payload);
@@ -137,12 +139,12 @@ public class SugarServiceV4ImplTest {
 	}
 
 	@Test
-	public void testParseRecordFromJson() {
+    public void testSvcParseRecordFromJson() {
 		try {
 			String json = "{\"name\":\"first_name\",\"value\":\"John\"},"
 					+ "{\"name\":\"title\",\"value\":\"Mr\"},"
 					+ "{\"name\":\"last_name\",\"value\":\"Braithwaite\"}";
-			CrmRecord record = svc.parseRecordFromJson(json);
+			CrmRecord record = svc.parseRecordFromSugarRepresentation(json);
 			assertNotNull(record);
 			assertEquals("John", record.getCustom("first_name"));
 			assertEquals("Braithwaite", record.getCustom("last_name"));
@@ -153,8 +155,8 @@ public class SugarServiceV4ImplTest {
 		}
 	}
 
-	@Test
-	public void testParseRecordFromSugarSerialisation() {
+    @Test
+    public void testParseContactFromSugarSerialisation() {
 		try {
 			String json = "{\"entry_list\":["
 					+ "{\"id\":\"52cd2f26-6497-6ac6-8389-52d69314b6cc\","
@@ -162,10 +164,11 @@ public class SugarServiceV4ImplTest {
 					+ "\"id\":{\"name\":\"id\",\"value\":\"52cd2f26-6497-6ac6-8389-52d69314b6cc\"},"
 					+ "\"first_name\":{\"name\":\"first_name\",\"value\":\"John\"},"
 					+ "\"last_name\":{\"name\":\"last_name\",\"value\":\"Braithwaite\"},"
-					+ "\"salutation\":{\"name\":\"salutation\",\"value\":\"Mr\"}}"
+                    + "\"salutation\":{\"name\":\"salutation\",\"value\":\"Mr\"},"
+                    + "\"company_no_c\":{\"name\":\"company_no_c\",\"value\":\"\"}}"
 					+ "}],"
 					+ "\"relationship_list\":[]}";
-			CrmRecord record = svc.parseRecordFromJson(json);
+			CrmRecord record = svc.parseRecordFromSugarRepresentation(json);
 			assertNotNull(record);
 			assertEquals("John", record.getCustom("first_name"));
 			assertEquals("Braithwaite", record.getCustom("last_name"));
@@ -175,7 +178,35 @@ public class SugarServiceV4ImplTest {
 			fail(e.getClass().getName() + ":" + e.getMessage());
 		}
 	}
-	@Test
+
+    @Test
+    public void testParseAccountFromSugarSerialisation() {
+        try {
+            String json = "{\"entry_list\":["
+                    + "{\"id\":\"52cd2f26-6497-6ac6-8389-52d69314b6cc\","
+                    + "\"module_name\":\"Accounts\",\"name_value_list\":{"
+                    + "\"id\":{\"name\":\"id\",\"value\":\"52cd2f26-6497-6ac6-8389-52d69314b6cc\"},"
+                    + "\"name\":{\"name\":\"name\",\"value\":\"Ergo Digital Ltd\"},"
+                    + "\"year_established_c\":{\"name\":\"year_established_c\",\"value\":\"2008\"},"
+                    + "\"employees\":{\"name\":\"employees\",\"value\":\"5\"},"
+                    + "\"business_website_c\":{\"name\":\"business_website_c\",\"value\":\"http:\\/\\/www.ergodigital.com\\/\"},"
+                    + "\"company_no_c\":{\"name\":\"company_no_c\",\"value\":\"\"}}"
+                    + "}]," + "\"relationship_list\":[]}";
+            CrmRecord record = svc.parseRecordFromSugarRepresentation(json);
+            assertNotNull(record);
+            assertEquals("Ergo Digital Ltd", record.getCustom("name"));
+            assertEquals(5, record.getCustom("employees"));
+            assertEquals(2008, record.getCustom("year_established_c"));
+            assertEquals("http://www.ergodigital.com/",
+                    record.getCustom("business_website_c"));
+            assertEquals(null, record.getCustom("company_no_c"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getClass().getName() + ":" + e.getMessage());
+        }
+    }
+
+    @Test
 	public void testParseRecordsFromJsonArray() {
 		try {
 			String json = "{\"result_count\":20,\"total_count\":\"111\",\"next_offset\":40,"

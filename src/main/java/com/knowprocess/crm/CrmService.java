@@ -32,13 +32,26 @@ public interface CrmService {
 
 	CrmRecord createContact(CrmSession session, CrmRecord contact);
 
-	CrmRecord createAccountWithPrimeContact(CrmSession session,
+    CrmRecord updateAccount(CrmSession session, CrmRecord acct);
+
+    CrmRecord updateContact(CrmSession session, CrmRecord contact);
+
+    CrmRecord createAccountWithPrimeContact(CrmSession session,
 			CrmRecord contact, CrmRecord acct);
+
+    CrmRecord updateAccountWithPrimeContact(CrmSession session,
+            CrmRecord contact, CrmRecord acct);
 
 	CrmRecord createLead(CrmSession session, CrmRecord lead);
 
+    CrmRecord updateLead(CrmSession session, CrmRecord lead);
+
 	CrmRecord getContact(CrmSession session, String contactId)
 			throws IOException;
+
+    CrmRecord getAccount(CrmSession session, String acctId) throws IOException;
+
+    CrmRecord getLead(CrmSession session, String leadId) throws IOException;
 
 	List<CrmRecord> searchContacts(CrmSession session, CrmRecord query,
 			int offset, int maxResults) throws IOException;

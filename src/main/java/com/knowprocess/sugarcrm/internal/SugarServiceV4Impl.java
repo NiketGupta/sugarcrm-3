@@ -49,7 +49,7 @@ import com.knowprocess.sugarcrm.api.SugarSession;
 
 public class SugarServiceV4Impl {
 
-	private static final String SVC_URL_FRAGMENT = "service/v4/rest.php";
+    public static final String SVC_URL_FRAGMENT = "service/v4/rest.php";
 	private static final String NAME_VALUE_LIST_MARKER = "name_value_list";
 	private static final String NAME_MARKER = "\"name\":\"";
 	private static final String ID_MARKER = "\"id\":\"";
@@ -181,7 +181,7 @@ public class SugarServiceV4Impl {
 		String entry = doPost(
 				url,
 				getGetEntryPayload(session, moduleName, contactId, selectFields));
-		return parseRecordFromJson(entry);
+		return parseRecordFromSugarRepresentation(entry);
 	}
 
     public List<CrmRecord> getRelationships(CrmSession session,
@@ -195,7 +195,7 @@ public class SugarServiceV4Impl {
         return parseRecordsFromJson(entry);
     }
 
-	protected CrmRecord parseRecordFromJson(String entry) {
+	protected CrmRecord parseRecordFromSugarRepresentation(String entry) {
 		System.out.println("entry: " + entry);
 		CrmRecord record = new CrmRecord();
 		if (entry.contains(NAME_VALUE_LIST_MARKER)) {
@@ -213,23 +213,50 @@ public class SugarServiceV4Impl {
 						+ NAME_MARKER.length();
 				int vStart = nameValue.indexOf(VALUE_MARKER)
 						+ VALUE_MARKER.length();
-				try {
-					record.setCustom(
-							nameValue.substring(nStart,
-									nameValue.indexOf("\"", nStart)),
-							nameValue.substring(vStart,
-									nameValue.indexOf("\"", vStart)));
-				} catch (StringIndexOutOfBoundsException e) {
-					// object rather than simple child
-					// or could also be response is truncated which I have seen
-					// at 5079 chars (though sometimes over 6000)
+                if (vStart != -1) {
+                    try {
+                        String val = nameValue.substring(vStart,
+                                nameValue.indexOf("\"", vStart));
+                        System.out.println(String.format("Found value: %1$s",
+                                val));
+                        if (val.equals("company_no_c")) {
+                            System.err.println("TODO Remove this workaround");
+                            record.setCustom(
+                                    nameValue.substring(nStart,
+                                            nameValue.indexOf("\"", nStart)),
+                                    null);
+                        } else if (val.trim().length() > 0) {
+                            val = fixUrlIssue(val);
+                            record.setCustom(
+                                    nameValue.substring(nStart,
+                                            nameValue.indexOf("\"", nStart)),
+                                    val);
+                        }
+                    } catch (StringIndexOutOfBoundsException e) {
+                        // object rather than simple child
+                        // or could also be response is truncated which I have
+                        // seen
+                        // at 5079 chars (though sometimes over 6000)
+                    }
 				}
 			}
 		}
 		return record;
 	}
 
-	protected CrmRecord parseRecordFromJson1(String response) {
+    /**
+     * For some reason Sugar returns URLs like
+     * <code>http://www.ergodigital.com/</code> as
+     * <code>http:\/\/www.ergodigital.com\/</code>.
+     * 
+     * @param val
+     * @return
+     */
+    private String fixUrlIssue(String val) {
+        return val.replace("\\/", "/");
+    }
+
+    protected CrmRecord parseRecordFromJson1(String response) {
 		JsonReader reader = Json.createReader(new StringReader(response));
 		JsonObject value = reader.readObject();
 		System.out.println("value:" + value);
@@ -329,7 +356,7 @@ public class SugarServiceV4Impl {
 		ArrayList<CrmRecord> list = new ArrayList<CrmRecord>();
 		for (Iterator<JsonValue> it = array.listIterator(); it.hasNext();) {
 			JsonValue next = it.next();
-			list.add(parseRecordFromJson(next.toString()));
+			list.add(parseRecordFromSugarRepresentation(next.toString()));
 			// list.add(new CrmRecord());
 		}
 		return list;

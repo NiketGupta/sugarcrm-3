@@ -89,26 +89,48 @@ public class SugarService implements CrmService {
 		return acct;
 	}
 
-	/**
-	 * 
-	 * @see com.knowprocess.crm.api.CrmService#createContact(com.knowprocess
-	 *      .crm.api.CrmSession, com.knowprocess.crm.api.CrmRecord)
-	 */
+    /**
+     * 
+     */
+    public CrmRecord updateAccount(CrmSession session, CrmRecord acct) {
+        if (acct.getId() == null) {
+            throw new SugarException("Account id must not be null");
+        }
+
+        return createAccount(session, acct);
+    }
+
+    /**
+     * 
+     * @see com.knowprocess.crm.api.CrmService#createContact(com.knowprocess
+     *      .crm.api.CrmSession, com.knowprocess.crm.api.CrmRecord)
+     */
 	public CrmRecord createContact(CrmSession session, CrmRecord contact) {
 		return setEntry(session, contact, "Contacts");
 	}
 
-	protected CrmRecord setEntry(CrmSession session, CrmRecord contact,
+    /**
+     * 
+     */
+    public CrmRecord updateContact(CrmSession session, CrmRecord contact) {
+        if (contact.getId() == null) {
+            throw new SugarException("Contact id must not be null");
+        }
+
+        return createContact(session, contact);
+    }
+
+    protected CrmRecord setEntry(CrmSession session, CrmRecord record,
 			String moduleName) {
 		try {
-			contact.setId(impl.setEntry(session, moduleName,
-					contact.getNameValueListAsJson()));
+			record.setId(impl.setEntry(session, moduleName,
+					record.getNameValueListAsJson()));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new SugarException(e.getMessage(), e);
 		}
-		return contact;
+		return record;
 	}
 
 	/**
@@ -128,7 +150,22 @@ public class SugarService implements CrmService {
 		return contact;
 	}
 
-	private void createRelationship(CrmSession session, String moduleA,
+    /**
+     * 
+     */
+    public CrmRecord updateAccountWithPrimeContact(CrmSession session,
+            CrmRecord contact, CrmRecord acct) {
+        if (contact.getId() == null) {
+            throw new SugarException("Contact id must not be null");
+        }
+        if (acct.getId() == null) {
+            throw new SugarException("Account id must not be null");
+        }
+
+        return createAccountWithPrimeContact(session, contact, acct);
+    }
+
+    private void createRelationship(CrmSession session, String moduleA,
 			String idA, String moduleB, String idB) {
 		try {
 			String response = impl.setRelationship(session, moduleA, idA,
@@ -150,12 +187,23 @@ public class SugarService implements CrmService {
 		return setEntry(session, lead, "Leads");
 	}
 
-	/**
-	 * 
-	 * @throws IOException
-	 * @see com.knowprocess.crm.api.CrmService#getContact(com.knowprocess.crm
-	 *      .api.CrmSession, java.lang.String)
-	 */
+    /**
+     * 
+     */
+    public CrmRecord updateLead(CrmSession session, CrmRecord lead) {
+        if (lead.getId() == null) {
+            throw new SugarException("Lead id must not be null");
+        }
+
+        return createAccount(session, lead);
+    }
+
+    /**
+     * 
+     * @throws IOException
+     * @see com.knowprocess.crm.api.CrmService#getContact(com.knowprocess.crm
+     *      .api.CrmSession, java.lang.String)
+     */
 	public CrmRecord getContact(CrmSession session, String contactId)
 			throws IOException {
 		SugarContact contact = new SugarContact(impl.getEntry(session, "Contacts", contactId, ""));
@@ -165,6 +213,28 @@ public class SugarService implements CrmService {
         }
         return contact;
 	}
+
+    /**
+     * 
+     * @throws IOException
+     * @see com.knowprocess.crm.api.CrmService#getAccount(com.knowprocess.crm
+     *      .api.CrmSession, java.lang.String)
+     */
+    public CrmRecord getAccount(CrmSession session, String acctId)
+            throws IOException {
+        return new SugarAccount(impl.getEntry(session, "Accounts", acctId, ""));
+    }
+
+    /**
+     * 
+     * @throws IOException
+     * @see com.knowprocess.crm.api.CrmService#getLead(com.knowprocess.crm
+     *      .api.CrmSession, java.lang.String)
+     */
+    public CrmRecord getLead(CrmSession session, String leadId)
+            throws IOException {
+        return new SugarLead(impl.getEntry(session, "Leads", leadId, ""));
+    }
 
     public List<CrmRecord> getRelationships(CrmSession session,
             String moduleName, String id, String linkedModule)
@@ -248,7 +318,26 @@ public class SugarService implements CrmService {
 		return typedList;
 	}
 
-	public static String getNameValueListAsJson(Map<String, Object> properties) {
+    /**
+     * Sugar REST API uses a non-standard way of serializing. It is parseable as
+     * JSON but not in the usual way. For example:
+     * 
+     * <pre>
+     *   {"name":"Foo","value":"Bar"}
+     * </pre>
+     * 
+     * @param properties
+     * @return
+     */
+    public static String getNameValueListAsJson(String id,
+            Map<String, Object> properties) {
+        Object o = properties.put("id", id);
+        String tmp = getNameValueListAsJson(properties);
+        properties.remove(o);
+        return tmp;
+    }
+
+    public static String getNameValueListAsJson(Map<String, Object> properties) {
 		StringBuffer sb = new StringBuffer();
 		for (Iterator<Entry<String, Object>> it = properties.entrySet()
 				.iterator(); it.hasNext();) {

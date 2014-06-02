@@ -77,15 +77,15 @@ public class CrmRecord implements Serializable {
 	}
 
 	public Object getCustom(String name) {
-		return properties.get(name);
+        // System.out.println(String.format("Found %3$s? returning %1$s = %2$s",
+        // name, properties.get(name), properties.containsKey(name)));
+        return properties.get(name);
 	}
 
 	public void setCustom(String name, Object value) {
 		// System.out.println("Setting '" + name + "' to '" + value + "'");
 		if ("id".equals(name)) {
-			System.out.println("*****************" + value);
 			setId((String) value);
-			System.out.println("&&&&&&&&&" + getId());
         } else if (("date_entered".equals(name) || "date_modified".equals(name))
                 && value instanceof String) {
             // TODO need a smarter way to do this.
@@ -94,7 +94,8 @@ public class CrmRecord implements Serializable {
             } catch (ParseException e) {
                 System.err.println(e.getMessage());
             }
-        } else if (value == null || "null".equals(value)) {
+        } else if (value == null || "null".equals(value)
+                || "undefined".equals(value)) {
             // skip
         } else if (value instanceof String) {
             try {
@@ -108,7 +109,11 @@ public class CrmRecord implements Serializable {
 	}
 
 	public String getNameValueListAsJson() {
-		return SugarService.getNameValueListAsJson(properties);
+        if (id == null) {
+            return SugarService.getNameValueListAsJson(properties);
+        } else {
+            return SugarService.getNameValueListAsJson(id, properties);
+        }
 	}
 
 	// This works fine in theory but passing to search_by_module API always
